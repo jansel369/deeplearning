@@ -1,5 +1,5 @@
 import torch as pt
-from commons import *
+from lib.commons import *
 
 def initialize_params(X):
 
