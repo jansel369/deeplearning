@@ -1,14 +1,15 @@
 import torch as pt
-from lib.commons import *
+import matplotlib.pyplot as plt
+from commons import *
 
 def initialize_params(X):
 
-    w = pt.zeros(X.shape[0], 1, device=X.device)
-    b = pt.zeros(1,1, device=X.device)
+    w = pt.zeros(X.shape[0], 1, device=X.device, dtype=pt.double)
+    b = pt.tensor(0, device=X.device, dtype=pt.double)
 
     return w, b
 
-def propagate(w, b, X, Y, has_cost):
+def propagate(w, b, X, Y, has_cost=True):
     # w - wight vector (n, 1)
     # b - bias integer
     # X - input matrix (n, m)
@@ -16,9 +17,9 @@ def propagate(w, b, X, Y, has_cost):
     m = X.shape[1]
     
     # forward progaragtion
-    Z = w.t().mm(X) + b
-    A = sigmoid(Z)
-    cost =  - (1 / m) * (Y * pt.log(A) + (1 - Y) * pt.log(1 - A)).sum() if has_cost else 0
+    A = sigmoid(w.t().mm(X) + b)
+    print(A)
+    cost =  - (1 / m) * (Y * pt.log(A) + (1 - Y) * pt.log(1 - A)).sum().item() if has_cost else 0
 
     # backward propagation
     dz = A - Y
@@ -60,7 +61,7 @@ def predict(w, b, X, threshold = 0.5):
 
     return Y_pred
 
-def model(X_train, Y_train, X_test, Y_test, iterations = 2000, learning_rate = 0.05, prediction_threshold = 0.5, is_print_cost = False):
+def model(X_train, Y_train, X_test, Y_test, iterations=2000, learning_rate=0.05, prediction_threshold=0.5, is_print_cost=False):
     n, m = X_train.shape
 
     w, b = initialize_params(X_train)
@@ -75,6 +76,12 @@ def model(X_train, Y_train, X_test, Y_test, iterations = 2000, learning_rate = 0
 
     print("train accuracy: {} %".format(100 - (Y_pred_train - Y_train).abs().double().mean() * 100))
     print("test accuracy: {} %".format(100 - (Y_pred_test - Y_test).abs().double().mean() * 100))
+
+    plt.plot(costs)
+    plt.ylabel("costs")
+    plt.xlabel("iterations / 100s")
+    plt.tile("Logistic Regression (a=" + learning_rate + ")")
+    plt.show()
 
     return {
         "costs": costs,
