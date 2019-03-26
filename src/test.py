@@ -7,9 +7,12 @@ device = pt.device("cuda") if pt.cuda.is_available() else pt.device("cpu")
 
 banknote = loader("banknote.csv", device)
 
+
 X_train, Y_train, X_test, Y_test = divide_data(banknote)
 
-lr.model(X_train, Y_train, X_test, Y_test, is_print_cost=True)
+print(X_train)
+print(Y_train)
 
-print(banknote["Y"])
-print(banknote["X"])
+# dict = lr.model(X_train, Y_train, X_test, Y_test, is_print_cost=True)
+
+print(dict)

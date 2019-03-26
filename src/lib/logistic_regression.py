@@ -1,6 +1,6 @@
 import torch as pt
 import matplotlib.pyplot as plt
-from commons import *
+from .commons import *
 
 def initialize_params(X):
 
@@ -80,7 +80,7 @@ def model(X_train, Y_train, X_test, Y_test, iterations=2000, learning_rate=0.05,
     plt.plot(costs)
     plt.ylabel("costs")
     plt.xlabel("iterations / 100s")
-    plt.tile("Logistic Regression (a=" + learning_rate + ")")
+    plt.title("Logistic Regression (a=" + learning_rate + ")")
     plt.show()
 
     return {

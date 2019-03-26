@@ -8,13 +8,13 @@ def loader(dataset_name, device):
     # print(os.getcwd())
     df = pd.read_csv('datasets/' + dataset_name)
     headers = df.columns.tolist()
-    values = pt.tensor(df.values, device=device)
+    values = pt.tensor(df.values, device=device, dtype=pt.double)
     values = values[pt.randperm(values.shape[0])]
 
     n = values.shape[1] - 1
     m = values.shape[0]
     X = values[:, 0:n]
-    Y = values[:, n:n + 1].char().t()
+    Y = values[:, n:n + 1].t()
 
     return {
         "headers": headers,
