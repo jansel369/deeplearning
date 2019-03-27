@@ -13,7 +13,7 @@ def loader(dataset_name, device):
 
     n = values.shape[1] - 1
     m = values.shape[0]
-    X = values[:, 0:n]
+    X = values[:, 0:n].t()
     Y = values[:, n:n + 1].t()
 
     return {

@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from .commons import *
 
 def initialize_params(X):
-
     w = pt.zeros(X.shape[0], 1, device=X.device, dtype=pt.double)
     b = pt.tensor(0, device=X.device, dtype=pt.double)
 
@@ -15,13 +14,10 @@ def propagate(w, b, X, Y, has_cost=True):
     # X - input matrix (n, m)
     # Y - output label (1, m)
     m = X.shape[1]
-    
-    # forward progaragtion
+
     A = sigmoid(w.t().mm(X) + b)
-    print(A)
     cost =  - (1 / m) * (Y * pt.log(A) + (1 - Y) * pt.log(1 - A)).sum().item() if has_cost else 0
 
-    # backward propagation
     dz = A - Y
     dw = (1 / m) * X.mm(dz.t())
     db = (1 / m) * dz.sum()
@@ -48,7 +44,7 @@ def optimize(w, b, X, Y, iterations, learning_rate, is_printable_cost):
         if has_cost:
             costs.append(cost)
             if is_printable_cost:
-                print("Cost after iteration %i: %f" %(i, cost))
+                print("Cost after iteration %i: %f percent" %(i, cost * 100))
     
     params = { "w": w, "b": b }
 
@@ -59,9 +55,9 @@ def predict(w, b, X, threshold = 0.5):
     A = sigmoid(w.t().mm(X) + b)
     Y_pred = A > threshold
 
-    return Y_pred
+    return Y_pred.double()
 
-def model(X_train, Y_train, X_test, Y_test, iterations=2000, learning_rate=0.05, prediction_threshold=0.5, is_print_cost=False):
+def model(X_train, Y_train, X_test, Y_test, iterations=2500, learning_rate=0.05, prediction_threshold=0.5, is_print_cost=False):
     n, m = X_train.shape
 
     w, b = initialize_params(X_train)
@@ -80,7 +76,7 @@ def model(X_train, Y_train, X_test, Y_test, iterations=2000, learning_rate=0.05,
     plt.plot(costs)
     plt.ylabel("costs")
     plt.xlabel("iterations / 100s")
-    plt.title("Logistic Regression (a=" + learning_rate + ")")
+    plt.title("Logistic Regression (a=" + str(learning_rate) + ")")
     plt.show()
 
     return {
