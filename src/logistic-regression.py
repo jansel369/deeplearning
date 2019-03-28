@@ -29,3 +29,28 @@ def propagate(w, b, X, Y):
 
     return grads, cost
 
+def optimize(w, b, X, Y, iterations, learning_rate, print_cost=False):
+    costs = []
+
+    for i in range(iterations):
+        grads, cost = propagate(w, b, X, Y)
+
+        dw = grads["dw"]
+        db = grads["db"]
+
+        w = w - learning_rate * dw
+        b = b - learning_rate * db
+
+        # Record the costs
+        if i % 100 == 0:
+            costs.append(cost)
+        
+        # Print the cost every 100 training iterations
+        if print_cost and i % 100 == 0:
+            print ("Cost after iteration %i: %f" %(i, cost))
+
+    params = { "w": w, "b": b }
+    grads = { "dw": dw, "db": db }
+
+    return params, grads, costs
+
