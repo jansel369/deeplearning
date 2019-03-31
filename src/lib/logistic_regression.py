@@ -1,6 +1,6 @@
 import torch as pt
-import matplotlib.pyplot as plt
 from .commons import *
+import time
 
 def initialize_params(X):
     w = pt.zeros(X.shape[0], 1, device=X.device, dtype=pt.double)
@@ -59,6 +59,7 @@ def predict(w, b, X, threshold = 0.5):
 
 def model(X_train, Y_train, X_test, Y_test, iterations=2500, learning_rate=0.05, prediction_threshold=0.5, is_print_cost=False):
     n, m = X_train.shape
+    start_time = time.time()
 
     w, b = initialize_params(X_train)
     parameters, costs = optimize(w, b, X_train, Y_train, iterations, learning_rate, is_print_cost)
@@ -70,14 +71,13 @@ def model(X_train, Y_train, X_test, Y_test, iterations=2500, learning_rate=0.05,
     Y_pred_train = predict(w, b, X_train, prediction_threshold)
     Y_pred_test = predict(w, b, X_test, prediction_threshold)
 
-    print("train accuracy: {} %".format(100 - (Y_pred_train - Y_train).abs().double().mean() * 100))
-    print("test accuracy: {} %".format(100 - (Y_pred_test - Y_test).abs().double().mean() * 100))
+    Y_train_acc = 100 - (Y_pred_train - Y_train).abs().double().mean() * 100
+    Y_test_acc = 100 - (Y_pred_test - Y_test).abs().double().mean() * 100
 
-    plt.plot(costs)
-    plt.ylabel("costs")
-    plt.xlabel("iterations / 100s")
-    plt.title("Logistic Regression (a=" + str(learning_rate) + ")")
-    plt.show()
+    print("train accuracy: {} %".format(Y_train_acc))
+    print("test accuracy: {} %".format(Y_test_acc))
+
+    end_time = time.time()
 
     return {
         "costs": costs,
@@ -85,6 +85,7 @@ def model(X_train, Y_train, X_test, Y_test, iterations=2500, learning_rate=0.05,
         "b": b,
         "learning_rate": learning_rate,
         "iterations": iterations,
-        "y_pred_test": Y_pred_test,
-        "y_pred_train": Y_pred_train
+        "total_time": end_time - start_time,
+        "Y_train_acc": Y_train_acc,
+        "Y_test_acc": Y_test_acc,
     }
