@@ -65,7 +65,5 @@ class TestLogisticRegression(unittest.TestCase):
         print("Y pred: ")
         print(predict(w, b, X))
 
-
-
 if __name__ == "__main__":
     unittest.main()
