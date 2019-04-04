@@ -72,7 +72,7 @@ def liniar_activation_backward(dA, cache, activation):
     dA_prev, dW, db = linear_backward(dZ, cache)
 
     return dA_prev, dW, db
-
+ 
 def backward_propagation(AL, Y, caches):
     grads = {}
     L = len(caches)
@@ -107,4 +107,53 @@ def update_parameters(parameters, grads, learning_rate):
         parameters[b_l] = parameters[b_l] - learning_rate * grads["db" + str(l + 1)]
     
     return parameters
+
+# @todo: improve initialization
+def init_params(layers, device=pt.device("cpu")):
+    params = {}
+
+    for i, layer in enumerate(layers, start=1):
+        n_prev = layers[i - 1]["size"]
+        n = layer[size]
+
+        params["W" + str(i)] = pt.randn(n, n_prev, dtype=pt.double, device=device) * 0.01
+        params["b" + str(i)] = pt.zeros(n, 1, dtype=pt.double, device=device)
     
+    return params
+
+
+def Input(size):
+    layer = {
+        "size": size
+    }
+
+    return config = {
+        "layers": [config]
+    }
+
+def Layer(size, activation):
+    def a(config):
+        layer = {
+            "size": size,
+            "activation": activation,
+        }
+
+        config["layers"].append(layer)
+
+        return config
+    
+    return a
+
+class Model():
+    def __init__(self, config):
+        self.config = config
+        self.optimizer = "adam"
+    
+    # def optimization()
+
+    def fit(X_train, X_test):
+    
+    def evaluate(Y_train, Y_test):
+
+
+

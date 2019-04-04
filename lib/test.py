@@ -1,8 +1,8 @@
-import torch as pt
-from commons import *
+# import torch as pt
+# from commons import *
 
-dtype = pt.float
-cuda0 = pt.device("cuda:0")
+# dtype = pt.float
+# cuda0 = pt.device("cuda:0")
 
 # A = pt.tensor([[1., 2., 3.], [4., 5., 6.]], device=cuda0)
 # B = pt.tensor([[2.], [4.], [6.]], device=cuda0)
@@ -10,3 +10,5 @@ cuda0 = pt.device("cuda:0")
 # print(B.shape)
 # print(sigmoid(A.mm(B)).device)
 
+def say():
+    print("from lib test")
