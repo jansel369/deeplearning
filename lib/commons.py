@@ -11,7 +11,7 @@ def sigmoid_backward(dA, cache):
     # dA * g'(z)
     return dA * A * (1 - A)
 
-def relu_backward(dA, cache)
+def relu_backward(dA, cache):
     A = cache[0]
     # dA * g'(z)
     return dA * pt.tensor((A > 0).clone(), dtype=pt.double, device=dA.device)

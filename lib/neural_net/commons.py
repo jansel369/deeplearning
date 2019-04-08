@@ -1,7 +1,4 @@
-import torch as pt
-
 from commons import *
-
 
 def liniar_forward(W, A, b):
     Z = W.mm(A) + b
@@ -59,9 +56,6 @@ def liniar_backward(dz, cache):
     return dA_prev, dW, db
 
 def liniar_activation_backward(dA, cache, activation):
-
-    # linear_cache, activation_cache = cache
-
 
     if activation == "sigmoid":
         dZ = sigmoid_backward(dA, cache)
@@ -122,49 +116,5 @@ def init_params(layers, device=pt.device("cpu")):
     return params
 
 
-def Input(size):
-    layer = {
-        "size": size
-    }
-
-    config = {
-        "layers": [layer]
-    }
-
-    return config
-
-def Layer(size, activation):
-    def a(config):
-        layer = {
-            "size": size,
-            "activation": activation,
-        }
-
-        config["layers"].append(layer)
-
-        return config
-    
-    return a
-
-class Model():
-    def __init__(self, config):
-        self.config = config
-        self.optimizer = "gradient-descent"
-        # self.
-    
-    def optimization(self, optimizer):
-        self.optimizer = optimizer
-
-    def fit(self, X_train, X_test):
-        
-        return "test"
-        
-    def evaluate(self, Y_train, Y_test):
-
-        return "test"
-
-def GradientDescent(learning_rate, iterations):
-    def f(model):
-        
-
-    return f
+def test_commons():
+    print("test from commons: ", __name__)
