@@ -1,30 +1,36 @@
 import torch as pt
-
 from .commons import *
+import copy
 
-def Input(size):
+def create_layer_config(size):
     layer = {
-        "size": size
+        'size': size,
+        'activations': []
     }
 
+    return layer
+
+def Input(size):
+    layer = create_layer_config(size)
+
     config = {
-        "layers": [layer]
+        'layers': [layer]
     }
 
     return config
 
-def Layer(size, activation):
+def Layer(size):
     def a(config):
-        layer = {
-            "size": size,
-            "activation": activation
-        }
+        config = copy.deepcopy(config)
+
+        layer = create_layer_config(size)
 
         config["layers"].append(layer)
 
         return config
 
     return a
+
 
 class Model():
     def __init__(self, config):
@@ -40,7 +46,4 @@ class Model():
 
         return self.optimizer(X_train, Y_train, parameters)
         
-    # def evaluate(self, Y_train, Y_test):
-
-    #     return "test"
 

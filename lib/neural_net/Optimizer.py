@@ -1,3 +1,5 @@
+import copy
+
 from .commons import *
 
 def optimization(X, Y, parameters, learning_rate, iterations, loss):
