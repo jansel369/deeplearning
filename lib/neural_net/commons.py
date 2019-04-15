@@ -1,9 +1,16 @@
 from commons import *
 
-def liniar_forward(W, A_prev, b):
+# def liniar_forward(A_prev, W, b):
+#     Z = W.mm(A_prev) + b
+
+#     return Z, (A_prev, W, b)
+
+def liniar_forward(A_prev, W, b, stack = []):
     Z = W.mm(A_prev) + b
 
-    return Z, (A_prev, W, b)
+    stack.append((A_prev, W, b))
+
+    return Z, stack
 
 def liniar_activation_forward(A_prev, W, b, activation):
     
@@ -118,3 +125,4 @@ def init_params(layers, device=pt.device("cpu")):
 
 def test_commons():
     print("test from commons: ", __name__)
+

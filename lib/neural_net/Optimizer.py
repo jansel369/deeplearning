@@ -2,7 +2,35 @@ import copy
 
 from .commons import *
 
-def optimization(X, Y, parameters, learning_rate, iterations, loss):
+def Adam(learning_reate, batch_size, epoch):
+    def f(config):
+        config = copy.deepcopy(config)
+        
+        # @todo: finish
+        config['optimization'] = {
+            
+        }
+
+        return config
+
+    return f
+
+def GradientDescent(learning_rate, iterations, loss="cross_entropy_loss"):
+    def f(config):
+        config = copy.deepcopy(config)
+
+        config['optimization'] = {
+            'learning_rate': learning_rate,
+            'iterations': iterations,
+            'loss': loss,
+        }
+
+        return config
+
+    return f
+
+
+def gradient_descent_optimization(X, Y, parameters, learning_rate, iterations, loss, is_printable_cost=True):
     costs = []
 
     for i in range(iterations):
@@ -23,13 +51,14 @@ def optimization(X, Y, parameters, learning_rate, iterations, loss):
 
     return parameters, costs
 
-def GradientDescent(learning_rate, iterations, loss="cross_entropy"):
-    def f(model):
-        def optimizer(X, Y, parameters):
-            return optimization(X, Y, parameters, learning_rate, iterations, loss)
+# def gradient_descent(learning_rate, iterations, loss="cross_entropy"):
+#     def f(model):
+#         def optimizer(X, Y, parameters):
+#             return optimization(X, Y, parameters, learning_rate, iterations, loss)
 
-        model.optimization(optimizer)
+#         model.optimization(optimizer)
 
-        return model
+#         return model
 
-    return f
+#     return f
+

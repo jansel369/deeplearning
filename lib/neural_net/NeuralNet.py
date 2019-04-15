@@ -1,6 +1,7 @@
 import torch as pt
 from .commons import *
 import copy
+import optimizer
 
 def create_layer_config(size):
     layer = {
@@ -30,20 +31,3 @@ def Layer(size):
         return config
 
     return a
-
-
-class Model():
-    def __init__(self, config):
-        self.config = config
-    
-    def optimization(self, optimizer):
-        self.optimizer = optimizer
-
-    def fit(self, X_train, Y_train):
-        device = pt.device("cuda") if pt.cuda.is_available() else pt.device("cpu")
-        
-        parameters = init_params(self.config["layers"], device)
-
-        return self.optimizer(X_train, Y_train, parameters)
-        
-
