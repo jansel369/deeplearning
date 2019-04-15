@@ -18,3 +18,21 @@ def relu_backward(dA, cache):
 
 def d_cross_entropy_loss(AL, Y):
     return - (pt.devide(Y, AL) - pt.devide(1 - Y, 1 - AL))
+
+def soft_max(Z):
+    e = Z.exp()
+
+    return e / e.sum()
+
+def sigmoid_cross_entropy_backward(AL, Y):
+    """
+        summary of derivative dz = da/dz.dL/da with sigmoid
+    """
+    return Y - AL
+
+def softmax_cross_entropy_backward(AL, Y):
+    """
+        summary of derivative dz = da/dz.dL/da with softmax
+    """
+
+    return Y - AL

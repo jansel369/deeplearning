@@ -1,9 +1,9 @@
 from commons import *
 
-def liniar_forward(W, A, b):
-    Z = W.mm(A) + b
+def liniar_forward(W, A_prev, b):
+    Z = W.mm(A_prev) + b
 
-    return Z, (A, W, b)
+    return Z, (A_prev, W, b)
 
 def liniar_activation_forward(A_prev, W, b, activation):
     
@@ -22,7 +22,7 @@ def liniar_activation_forward(A_prev, W, b, activation):
 
 def forward_propagation(X, parameters):
 
-    caches = []
+    caches = [] 
     A = X
     L = len(parameters)
 
@@ -30,7 +30,7 @@ def forward_propagation(X, parameters):
         A_prev = A
         Wl = parameters["W" + str(l)]
         bl = parameters["b" + str(l)]
-        activation = "relu" if l < L else "sigmoid"
+        # activation = "relu" if l < L else "sigmoid"
         A, cache = liniar_activation_forward(A_prev, Wl, bl, activation)
         caches.append(cache)
 

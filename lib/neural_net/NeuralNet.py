@@ -23,7 +23,7 @@ def Layer(size, activation):
         config["layers"].append(layer)
 
         return config
-    
+
     return a
 
 class Model():
