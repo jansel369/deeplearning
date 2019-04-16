@@ -6,7 +6,7 @@ import optimizer
 def create_layer_config(size):
     layer = {
         'size': size,
-        'activations': []
+        'activation': ''
     }
 
     return layer

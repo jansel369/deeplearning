@@ -7,12 +7,8 @@ def compose_forward_propagation(layers):
     for l in range(len(layers)):
         layer = layers[l + 1]
 
-        
-
 
     return forward
-
-
 
 
 class Model():
@@ -20,8 +16,6 @@ class Model():
         self._config = copy.deepcopy(config)
 
         layers = config['layers']
-
-
         
     
     # def optimization(self, optimizer):

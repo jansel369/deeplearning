@@ -6,15 +6,15 @@ def sigmoid(z):
 def relu(z):
     return pt.max(z, 0)
 
-def sigmoid_backward(dA, cache):
-    A = cache[0]
-    # dA * g'(z)
-    return dA * A * (1 - A)
+def sigmoid_backward(A):
+    # A = cache[0]
+    # g'(z)
+    return A * (1 - A)
 
-def relu_backward(dA, cache):
-    A = cache[0]
-    # dA * g'(z)
-    return dA * pt.tensor((A > 0).clone(), dtype=pt.double, device=dA.device)
+def relu_backward(A):
+    # A = cache[0]
+    # g'(z)
+    return pt.tensor((A > 0).clone(), dtype=pt.double, device=A.device)
 
 def d_cross_entropy_loss(AL, Y):
     return - (pt.devide(Y, AL) - pt.devide(1 - Y, 1 - AL))
@@ -28,11 +28,18 @@ def sigmoid_cross_entropy_backward(AL, Y):
     """
         summary of derivative dz = da/dz.dL/da with sigmoid
     """
-    return Y - AL
+    return AL - Y
 
 def softmax_cross_entropy_backward(AL, Y):
     """
         summary of derivative dz = da/dz.dL/da with softmax
     """
 
-    return Y - AL
+    return AL - Y
+
+def compute_cross_entropy_cost(AL, Y):
+
+    m = Y.shape[1]
+    cost =  - (1 / m) * (Y * pt.log(AL) + (1 - Y) * pt.log(1 - AL)).sum()
+
+    return cost

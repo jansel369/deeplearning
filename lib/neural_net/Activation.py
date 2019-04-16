@@ -4,7 +4,7 @@ def Relu():
     def f(config):
         config = copy.deepcopy(config)
 
-        config['layers'][-1]['activations'].append("relu")
+        config['layers'][-1]['activation'] = 'relu'
 
         return config
 
@@ -13,7 +13,7 @@ def Relu():
 def Sigmoid():
     def f(config):
         config = copy.deepcopy(config)
-        config['layers'][-1]['activations'].append("sigmoid")
+        config['layers'][-1]['activation'] = 'sigmoid'
 
         return config
 
@@ -22,7 +22,7 @@ def Sigmoid():
 def Softmax():
     def f(config):
         config = copy.deepcopy(config)
-        config['layers'][-1]['activations'].append("softmax")
+        config['layers'][-1]['activation'] = 'softmax'
         
         return config
     
