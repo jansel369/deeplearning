@@ -1,31 +1,5 @@
 from commons import *
-
-# def liniar_forward(A_prev, W, b):
-#     Z = W.mm(A_prev) + b
-
-#     return Z, (A_prev, W, b)
-
-# def forward_propagation2()
-
-# def liniear_input(X, stack = []):
-#     return X, stack
-
-
-def liniar_activation_forward(A, activation)
-
-# def liniar_activation_forward(A_prev, W, b, activation):
-    
-#     Z, liniar_cache = liniar_forward(W, A_prev, b)
-
-#     if activation == "sigmoid":
-#         A = sigmoid(z)
-
-#     if activation == "relu":
-#         A = relu(z)
-    
-#     cache = liniar_cache + (A, activation)
-
-#     return A, cache
+import torch as pt
 
 # @todo: improve initialization
 def init_params(layers, device=pt.device("cpu")):

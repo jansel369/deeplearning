@@ -23,6 +23,25 @@ activation_backward_dict = {
     'relu': relu_backward
 }
 
+def predict(X, Y, parameters, layers):
+    Al = X
+    L = len(layers)
+
+    for l in range(1, L + 1):
+        layer = layers[l]
+        A_prev = Al
+
+        Wl = parameters["W" + str(l)]
+        bl = parameters["b" + str(l)]
+
+        Zl = liniar_forward(A_prev, Wl, bl)
+        Al = activation_forward(Al, layer)
+
+    equality = Al.argmax(1).eq(Y.argmax(1))
+
+    return equality.double().mean() * 100
+
+
 def liniar_forward(A_prev, W, b):
 
     Z = W.mm(A_prev) + b
@@ -105,6 +124,7 @@ def GradientDescent(learning_rate, iterations, loss="cross_entropy"):
         config = copy.deepcopy(config)
 
         config['optimization'] = {
+            'optimizer': 'gradient_descent',
             'learning_rate': learning_rate,
             'iterations': iterations,
             'loss': loss,
@@ -115,7 +135,7 @@ def GradientDescent(learning_rate, iterations, loss="cross_entropy"):
     return f
 
 
-def gradient_descent_optimization(X, Y, parameters, config, is_printable_cost=False):
+def gradient_descent_optimization(X, Y, parameters, config, is_printable_cost):
     costs = []
     optimization = config['optimization']
     iterations = optimization['iterations']

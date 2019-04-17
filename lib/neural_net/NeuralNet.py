@@ -1,7 +1,7 @@
 import torch as pt
-from .commons import *
+# from .commons import *
 import copy
-import optimizer
+# import optimizer
 
 def create_layer_config(size):
     layer = {
