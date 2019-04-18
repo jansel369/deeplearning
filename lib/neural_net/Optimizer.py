@@ -6,7 +6,7 @@ from commons import *
 activations_dict = {
     'sigmoid': sigmoid,
     'relu': relu,
-    'soft_max': soft_max,
+    'softmax': softmax,
 }
 
 costs_dict = {
@@ -44,22 +44,29 @@ def predict(X, Y, parameters, layers):
 
 def liniar_forward(A_prev, W, b):
 
+    # print("A prev %s" % A_prev)
+    # print("W: %s" % W )
+    # print("b: %s" % b)
+
     Z = W.mm(A_prev) + b
 
     return Z
 
-def activation_forward(A, layer):
+def activation_forward(Z, layer):
     activation = layer['activation']
 
-    return activations_dict[activation] if activation != '' else A
+    A = activations_dict[activation](Z)
+
+    return A
 
 def forward_propagation(X, parameters, layers):
 
     caches = []
     Al = X
     L = len(layers)
+    
+    for l in range(1, L):
 
-    for l in range(1, L + 1):
         layer = layers[l]
         A_prev = Al
 
@@ -67,7 +74,8 @@ def forward_propagation(X, parameters, layers):
         bl = parameters["b" + str(l)]
 
         Zl = liniar_forward(A_prev, Wl, bl)
-        Al = activation_forward(Al, layer)
+
+        Al = activation_forward(Zl, layer)
 
         caches.append((A_prev, Wl))
 
@@ -80,8 +88,11 @@ def backward_propagation(dzL, Y, caches, layers):
     L = len(layers)
     m = Y.shape[1]
 
-    for l in reversed(range(L)):
-        (A_prev, Wl) = caches[l]
+    for l in reversed(range(1, L)):
+        
+        print("l: ", l)
+
+        (A_prev, Wl) = caches[l - 1]
         activation = layers[l]['activation']
 
         # compute grads
@@ -144,13 +155,14 @@ def gradient_descent_optimization(X, Y, parameters, config, is_printable_cost):
     learning_rate = optimization['learning_rate']
 
     compute_cost = costs_dict[loss]
-    loss_backward = loss_backward_dict[layers[-1]['activation'] + loss]
+    loss_backward = loss_backward_dict[layers[-1]['activation'] + '_' + loss]
 
     for i in range(iterations):
 
         has_cost = i % 100 == 0
 
         AL, caches = forward_propagation(X, parameters, layers)
+
         if has_cost:
             cost = compute_cost(AL, Y)
             costs.append(cost)

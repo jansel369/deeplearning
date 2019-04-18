@@ -10,6 +10,8 @@ import unittest
 
 import mnist.input_data as data_source
 
+# def toTensor(np)
+
 class TestNeuralNet(unittest.TestCase):
 
     def test_Input(self):
@@ -37,9 +39,20 @@ class TestNeuralNet(unittest.TestCase):
         # source reference: https://github.com/llSourcell/tensorflow_demo/blob/master/board.py
 
         mnist = data_source.read_data_sets("datasets/mnist/data/", one_hot=True)
-        print("train shape: ", mnist.train.images.shape)
-        print("validation shape: ",  mnist.validation.images.shape)
-        print("test shape", mnist.test.images.shape)
+        device = nn.get_device()
+
+        X_train = nn.from_numpy(mnist.train.images.T, device)
+        Y_train = nn.from_numpy(mnist.train.labels.T, device)
+
+        X_test = nn.from_numpy(mnist.test.images.T, device)
+        Y_test = nn.from_numpy(mnist.test.labels.T, device)
+
+        X_validation = nn.from_numpy(mnist.validation.images.T, device)
+        Y_validation = nn.from_numpy(mnist.validation.labels.T, device)
+
+        print("\ntrain shape: X=%s, Y=%s" % (X_train.shape, Y_train.shape))
+        print("validation shape: X=%s, Y=%s" % (X_validation.shape, Y_validation.shape))
+        print("test shape: X=%s, Y=%s" % (X_test.shape, Y_test.shape))
 
         # print(mnist.train.images[0])
         # print("\n", mnist.train.labels[0])
@@ -51,12 +64,24 @@ class TestNeuralNet(unittest.TestCase):
         n = 784
 
         X = nn.Input(n)
-        X = nn.Layer(50, "relu")(X)
-        X = nn.Layer(20, "relu")(X)
-        X = nn.Layer(10, "softmax")(X)
+        X = nn.Layer(50)(X)
+        X = nn.Relu()(X)
+        X = nn.Layer(20)(X)
+        X = nn.Relu()(X)
+        X = nn.Layer(10)(X)
+        X = nn.Softmax()(X)
 
+        X = nn.GradientDescent(learning_rate, training_iteration)(X)
 
+        model = nn.Model(X)
 
+        model.fit(X_train, Y_train, True, device=device)
+
+        train_acc = model.evaluate(X_train, Y_train)
+        test_acc = model.evaluate(X_test, Y_test)
+
+        print("train accuracy: {} %".format(train_acc))
+        print("test accuracy: {} %".format(test_acc))
     
 
 if __name__ == "__main__":

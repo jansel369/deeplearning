@@ -36,8 +36,17 @@ class Model():
     # def optimization(self, optimizer):
     #     self.optimizer = optimizer
 
-    def fit(self, X_train, Y_train, is_printable_cost=False):
-        device = pt.device("cuda") if pt.cuda.is_available() else pt.device("cpu")
+    def fit(self, X_train, Y_train, is_printable_cost=False, device=get_device()):
+        layers = self._config['layers']
+        input_size = layers[0]['size']
+        output_size = layers[-1]['size']
+        n = X_train.shape[0]
+        o = Y_train.shape[0]
+
+        assert input_size == n, 'Invalid input size: ' + str(input_size) + ' : ' + str(n)
+        assert output_size == o, 'Invalid output size: ' + str(output_size) + ' : ' + str(o)
+
+        # device = pt.device("cuda") if pt.cuda.is_available() else pt.device("cpu")
         optimizer = self._config['optimization']['optimizer']
 
         parameters = init_params(self._config["layers"], device)
@@ -51,8 +60,7 @@ class Model():
         plot_cost(costs, self._config['optimization']['learning_rate'])
     
     def evaluate(self, X, Y):
-        AL = predict(X, Y, self._config['layers'])
-
+        return predict(X, Y, self._parameters, self._config['layers'])
         # return parameters, costs
 # def MakeModel(config):
     

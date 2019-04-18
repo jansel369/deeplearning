@@ -3,8 +3,11 @@ import torch as pt
 def sigmoid(z):
     return 1 / (1 + pt.exp(-z))
 
-def relu(z):
-    return pt.max(z, 0)
+def relu(Z):
+    
+    Z[Z < 0] = 0
+    
+    return Z
 
 def sigmoid_backward(A):
     # A = cache[0]
@@ -19,7 +22,7 @@ def relu_backward(A):
 def d_cross_entropy_loss(AL, Y):
     return - (pt.devide(Y, AL) - pt.devide(1 - Y, 1 - AL))
 
-def soft_max(Z):
+def softmax(Z):
     e = Z.exp()
 
     return e / e.sum()
