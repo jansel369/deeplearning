@@ -88,12 +88,13 @@ def backward_propagation(dzL, Y, caches, layers):
     L = len(layers)
     m = Y.shape[1]
 
-    for l in reversed(range(1, L)):
+    for l in reversed(range(L-1)):
         
-        print("l: ", l)
+        # print("l: ", l)
 
-        (A_prev, Wl) = caches[l - 1]
-        activation = layers[l]['activation']
+        (A_prev, Wl) = caches[l]
+
+        # print("APrev: %d" % (l), A_prev.shape)
 
         # compute grads
         grads['dW' + str(l + 1)] = (1 / m) * dzl.mm(A_prev.t())
@@ -101,16 +102,36 @@ def backward_propagation(dzL, Y, caches, layers):
 
         # compute next dz
         # dz_prev = dA * g' = dz x A_prev * g'(z)
-        dzl = Wl.t().mm(dzl) * activation_backward_dict[activation]
+
+        #compute next dz
+
+
+        # print("the activation: ", activation)
+
+        if l > 0:
+            activation = layers[l]['activation']
+            # print('activation: ', activation)
+            dzl = Wl.t().mm(dzl) * activation_backward_dict[activation](A_prev)
+
+    # print("grads: dwl", grads["dW1"].shape)
     
     return grads
 
 def update_parameters(parameters, grads, learning_rate):
     
-    L = len(parameters)
+    L = int(len(parameters) / 2)
+
+    # print("value of L: ", L)
+
+    # print(grads)
 
     for l in range(L):
+
         W_l = "W" + str(l+1)
+        
+        # print(parameters[W_l].shape)
+        # print(grads["dW" + str(l + 1)].shape)
+
         parameters[W_l] = parameters[W_l] - learning_rate * grads["dW" + str(l + 1)]
         b_l = "b" + str(l+1)
         parameters[b_l] = parameters[b_l] - learning_rate * grads["db" + str(l + 1)]
@@ -159,7 +180,9 @@ def gradient_descent_optimization(X, Y, parameters, config, is_printable_cost):
 
     for i in range(iterations):
 
-        has_cost = i % 100 == 0
+        has_cost = i % 50 == 0
+
+        # print(i)
 
         AL, caches = forward_propagation(X, parameters, layers)
 

@@ -15,9 +15,11 @@ def sigmoid_backward(A):
     return A * (1 - A)
 
 def relu_backward(A):
-    # A = cache[0]
     # g'(z)
-    return pt.tensor((A > 0).clone(), dtype=pt.double, device=A.device)
+
+    back = (A > 0).clone().detach()
+
+    return pt.tensor(back, dtype=pt.double, device=A.device)
 
 def d_cross_entropy_loss(AL, Y):
     return - (pt.devide(Y, AL) - pt.devide(1 - Y, 1 - AL))

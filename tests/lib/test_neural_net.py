@@ -58,7 +58,7 @@ class TestNeuralNet(unittest.TestCase):
         # print("\n", mnist.train.labels[0])
 
         learning_rate = 0.01
-        training_iteration = 30
+        training_iteration = 1000
         batch_size = 100
         display_step = 2
         n = 784
@@ -75,7 +75,7 @@ class TestNeuralNet(unittest.TestCase):
 
         model = nn.Model(X)
 
-        model.fit(X_train, Y_train, True, device=device)
+        model.fit(X_train, Y_train, True, device)
 
         train_acc = model.evaluate(X_train, Y_train)
         test_acc = model.evaluate(X_test, Y_test)
