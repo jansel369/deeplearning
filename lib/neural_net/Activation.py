@@ -1,5 +1,12 @@
 import copy
 
+linear = 'linear'
+sigmoid = 'sigmoid'
+tanh = 'tanh'
+relu = 'relu'
+softmax = 'softmax'
+
+
 def Relu():
     def f(config):
         config = copy.deepcopy(config)

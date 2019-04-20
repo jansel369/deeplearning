@@ -25,7 +25,9 @@ def d_cross_entropy_loss(AL, Y):
     return - (pt.devide(Y, AL) - pt.devide(1 - Y, 1 - AL))
 
 def softmax(Z):
-    e = Z.exp()
+    # e = Z.exp()
+    # stable version
+    e = pt.exp(Z - Z.max())
 
     return e / e.sum()
 
@@ -46,5 +48,12 @@ def compute_cross_entropy_cost(AL, Y):
 
     m = Y.shape[1]
     cost =  - (1 / m) * (Y * pt.log(AL) + (1 - Y) * pt.log(1 - AL)).sum()
+
+    return cost
+
+def softmax_cost(AL, Y):
+    m = Y.shape[1]
+    
+    cost = - (1 / m) * (Y * AL.log()).sum()
 
     return cost

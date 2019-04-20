@@ -14,6 +14,10 @@ costs_dict = {
 }
 
 loss_backward_dict = {
+
+    """ Computes layer L gradients
+    """
+
     'sigmoid_cross_entropy': sigmoid_cross_entropy_backward,
     'softmax_cross_entropy': softmax_cross_entropy_backward,
 }
