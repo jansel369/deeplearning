@@ -21,6 +21,7 @@ def propagate(w, b, X, Y, has_cost=True):
     cost =  - (1 / m) * (Y * pt.log(A) + (1 - Y) * pt.log(1 - A)).sum().item() if has_cost else 0
 
     dz = A - Y
+
     dw = (1 / m) * X.mm(dz.t())
     db = (1 / m) * dz.sum()
 

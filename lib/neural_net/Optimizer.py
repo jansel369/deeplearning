@@ -17,8 +17,8 @@ costs_dict = {
 }
 
 loss_backward_dict = {
-    l.categorical_crossentropy: l.binary_crossentropy_backward,
-    l.binary_crossentropy: l.categorical_crossentoropy_backward,
+    l.categorical_crossentropy: l.categorical_crossentoropy_backward,
+    l.binary_crossentropy: l.binary_crossentropy_backward,
 }
 
 activation_backward_dict = {
@@ -30,7 +30,8 @@ def predict(X, Y, parameters, layers):
     Al = X
     L = len(layers)
 
-    for l in range(1, L + 1):
+
+    for l in range(1, L):
         layer = layers[l]
         A_prev = Al
 
@@ -38,7 +39,7 @@ def predict(X, Y, parameters, layers):
         bl = parameters["b" + str(l)]
 
         Zl = liniar_forward(A_prev, Wl, bl)
-        Al = activation_forward(Al, layer)
+        Al = activation_forward(Zl, layer)
 
     equality = Al.argmax(1).eq(Y.argmax(1))
 
@@ -79,42 +80,35 @@ def forward_propagation(X, parameters, layers):
     return Al, caches
     
 
-def backward_propagation(dzL, Y, caches, layers):
+def backward_propagation(dZL, Y, caches, layers):
     grads = {}
-    dzl = dzL
-    L = len(layers)
+    dZl = dZL
+    # L = len(layers)
     m = Y.shape[1]
 
-    for l in reversed(range(L-1)):
+    for l in reversed(range(len(caches))):
+
+        # print("l: ", l)
         (A_prev, Wl) = caches[l]
 
-        grads['dW' + str(l + 1)] = (1 / m) * dzl.mm(A_prev.t())
-        grads['db' + str(l + 1)] = (1 / m) * dzl.sum(dim=1, keepdim=True)
+        grads['dW' + str(l + 1)] =  (1 / m) * dZl.mm(A_prev.t())
+        grads['db' + str(l + 1)] = (1 / m) * dZl.sum(dim=1, keepdim=True)
 
         if l > 0:
-            activation = layers[l]['activation']
-            dzl = Wl.t().mm(dzl) * activation_backward_dict[activation](A_prev)
+            prev_activation = layers[l]['activation']
+            # print('prev activation: ', l,  prev_activation)
+            dZl = Wl.t().mm(dZl) * activation_backward_dict[prev_activation](A_prev)
 
     return grads
 
-def update_parameters(parameters, grads, learning_rate):
-    
-    L = int(len(parameters) / 2)
+def update_parameters(L, parameters, grads, learning_rate):
+    for l in range(1, L):
 
-    # print("value of L: ", L)
+        W_l = "W" + str(l)
+        b_l = "b" + str(l)
 
-    # print(grads)
-
-    for l in range(L):
-
-        W_l = "W" + str(l+1)
-        
-        # print(parameters[W_l].shape)
-        # print(grads["dW" + str(l + 1)].shape)
-
-        parameters[W_l] = parameters[W_l] - learning_rate * grads["dW" + str(l + 1)]
-        b_l = "b" + str(l+1)
-        parameters[b_l] = parameters[b_l] - learning_rate * grads["db" + str(l + 1)]
+        parameters[W_l] = parameters[W_l] - learning_rate * grads["dW" + str(l)]
+        parameters[b_l] = parameters[b_l] - learning_rate * grads["db" + str(l)]
     
     return parameters
 
@@ -128,6 +122,7 @@ class GradientDescent():
     def optimize(self, X, Y, parameters, config, is_printable_cost):
         costs = []
         layers = config['layers']
+        L = len(layers)
 
         compute_cost = costs_dict[self.loss]
         loss_backward = loss_backward_dict[self.loss]
@@ -151,6 +146,6 @@ class GradientDescent():
 
             grads = backward_propagation(dZL, Y, caches, layers)
 
-            parameters = update_parameters(parameters, grads, self.learning_rate)
+            parameters = update_parameters(L, parameters, grads, self.learning_rate)
 
         return parameters, costs

@@ -15,26 +15,26 @@ import mnist.input_data as data_source
 
 class TestNeuralNet(unittest.TestCase):
 
-    def test_Input(self):
-        X = nn.input(100)
+    # def test_Input(self):
+    #     X = nna.input(100)
 
-        self.assertEqual(X["layers"][0]["size"], 100)
+    #     self.assertEqual(X["layers"][0]["size"], 100)
     
-    def _init_params(self):
-        X = nn.input(20)
-        X = nn.layer(50, "relu")(X)
-        X = nn.layer(22, "relu")(X)
-        X = nn.layer(1, "sigmoid")(X)
+    # def _init_params(self):
+    #     X = nna.input(20)
+    #     X = nna.layer(50, "relu")(X)
+    #     X = nna.layer(22, "relu")(X)
+    #     X = nna.layer(1, "sigmoid")(X)
 
-        parameters = nn.init_params(X["layers"])
+    #     parameters = nn.init_params(X["layers"])
 
-        self.assertEqual(len(parameters), 6)
-        self.assertEqual(parameters["W1"].shape, (50, 20))
-        self.assertEqual(parameters["W2"].shape, (22, 50))
-        self.assertEqual(parameters["W3"].shape, (1, 22))
-        self.assertEqual(parameters["b1"].shape, (50, 1))
-        self.assertEqual(parameters["b2"].shape, (22, 1))
-        self.assertEqual(parameters["b3"].shape, (1, 1))
+    #     self.assertEqual(len(parameters), 6)
+    #     self.assertEqual(parameters["W1"].shape, (50, 20))
+    #     self.assertEqual(parameters["W2"].shape, (22, 50))
+    #     self.assertEqual(parameters["W3"].shape, (1, 22))
+    #     self.assertEqual(parameters["b1"].shape, (50, 1))
+    #     self.assertEqual(parameters["b2"].shape, (22, 1))
+    #     self.assertEqual(parameters["b3"].shape, (1, 1))
 
     def test_neural_net(self):
         # source reference: https://github.com/llSourcell/tensorflow_demo/blob/master/board.py
@@ -55,19 +55,17 @@ class TestNeuralNet(unittest.TestCase):
         print("validation shape: X=%s, Y=%s" % (X_validation.shape, Y_validation.shape))
         print("test shape: X=%s, Y=%s" % (X_test.shape, Y_test.shape))
 
-        # print(mnist.train.images[0])
-        # print("\n", mnist.train.labels[0])
 
-        learning_rate = 0.05
-        training_iteration = 1000
-        batch_size = 100
-        display_step = 2
-        n = 784
+        learning_rate = 0.01
+        # batch_size = 100
+        # display_step = 2
+        training_iteration = 500
+        n = X_train.shape[0]
 
         X = nna.input(n)
-        X = nna.layer(10)(X)
+        X = nna.layer(50)(X)
         X = nna.relu()(X)
-        X = nna.layer(10)(X)
+        X = nna.layer(20)(X)
         X = nna.relu()(X)
         X = nna.layer(10)(X)
         X = nna.softmax()(X)
@@ -75,10 +73,13 @@ class TestNeuralNet(unittest.TestCase):
         # X = nn.GradientDescent(learning_rate, training_iteration)(X)
         optimizer = nn.GradientDescent(learning_rate, training_iteration, nn.categorical_crossentropy)
 
+        # print("optimiszesr: '%s'" % optimizer.loss)
+
         model = nn.Model(X)
 
         model.optimization(optimizer)
 
+        print("fitting model....")
         model.fit(X_train, Y_train, True, device)
 
         train_acc = model.evaluate(X_train, Y_train)

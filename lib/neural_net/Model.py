@@ -33,8 +33,6 @@ class Model():
 
         parameters = init_params(self._config["layers"], device)
 
-        # return self.optimizer(X_train, Y_train, parameters)
-
         parameters, costs = self.optimizer.optimize(X_train, Y_train, parameters, self._config, is_printable_cost)
         
         self._parameters = parameters;

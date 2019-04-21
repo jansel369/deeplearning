@@ -23,7 +23,6 @@ def sigmoid_backward(A):
 
 def relu_backward(A):
     # g'(z)
+    g = (A > 0).clone().detach()
 
-    back = (A > 0).clone().detach()
-
-    return pt.tensor(back, dtype=pt.double, device=A.device)
+    return pt.tensor(g, dtype=pt.double, device=A.device)
