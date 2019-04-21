@@ -1,7 +1,7 @@
-print("from test: ", __name__)
+# print("from test: ", __name__)
 
-from .commons import *
+# from .commons import *
 
-def test():
-    print("say something")
-    test_commons()
+# def test():
+#     print("say something")
+#     test_commons()

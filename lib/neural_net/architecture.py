@@ -1,5 +1,5 @@
 import torch as pt
-import activation
+import core.activation as a
 # from .commons import *
 import copy
 # import optimizer
@@ -7,7 +7,7 @@ import copy
 def create_layer_config(size):
     layer = {
         'size': size,
-        'activation': ''
+        'activation': '',
     }
 
     return layer
@@ -37,7 +37,7 @@ def relu():
     def f(config):
         config = copy.deepcopy(config)
 
-        config['layers'][-1]['activation'] = activation.relu
+        config['layers'][-1]['activation'] = a.relu
 
         return config
 
@@ -46,7 +46,7 @@ def relu():
 def rigmoid():
     def f(config):
         config = copy.deepcopy(config)
-        config['layers'][-1]['activation'] = activation.sigmoid
+        config['layers'][-1]['activation'] = a.sigmoid
 
         return config
 
@@ -55,7 +55,7 @@ def rigmoid():
 def softmax():
     def f(config):
         config = copy.deepcopy(config)
-        config['layers'][-1]['activation'] = activation.softmax
+        config['layers'][-1]['activation'] = a.softmax
         
         return config
     

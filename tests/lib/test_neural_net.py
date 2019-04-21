@@ -16,15 +16,15 @@ import mnist.input_data as data_source
 class TestNeuralNet(unittest.TestCase):
 
     def test_Input(self):
-        X = nn.Input(100)
+        X = nn.input(100)
 
         self.assertEqual(X["layers"][0]["size"], 100)
     
     def _init_params(self):
-        X = nn.Input(20)
-        X = nn.Layer(50, "relu")(X)
-        X = nn.Layer(22, "relu")(X)
-        X = nn.Layer(1, "sigmoid")(X)
+        X = nn.input(20)
+        X = nn.layer(50, "relu")(X)
+        X = nn.layer(22, "relu")(X)
+        X = nn.layer(1, "sigmoid")(X)
 
         parameters = nn.init_params(X["layers"])
 
@@ -58,23 +58,26 @@ class TestNeuralNet(unittest.TestCase):
         # print(mnist.train.images[0])
         # print("\n", mnist.train.labels[0])
 
-        learning_rate = 0.01
+        learning_rate = 0.05
         training_iteration = 1000
         batch_size = 100
         display_step = 2
         n = 784
 
         X = nna.input(n)
-        X = nna.layer(50)(X)
+        X = nna.layer(10)(X)
         X = nna.relu()(X)
-        X = nna.layer(20)(X)
+        X = nna.layer(10)(X)
         X = nna.relu()(X)
         X = nna.layer(10)(X)
         X = nna.softmax()(X)
 
-        X = nn.GradientDescent(learning_rate, training_iteration)(X)
+        # X = nn.GradientDescent(learning_rate, training_iteration)(X)
+        optimizer = nn.GradientDescent(learning_rate, training_iteration, nn.categorical_crossentropy)
 
         model = nn.Model(X)
+
+        model.optimization(optimizer)
 
         model.fit(X_train, Y_train, True, device)
 

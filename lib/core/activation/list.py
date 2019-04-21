@@ -1,0 +1,5 @@
+linear = 'linear'
+sigmoid = 'sigmoid'
+tanh = 'tanh'
+relu = 'relu'
+softmax = 'softmax'

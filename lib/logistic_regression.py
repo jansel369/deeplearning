@@ -1,6 +1,7 @@
 import torch as pt
 # from .commons import *
-import activation as a
+# import activation as a
+import core.activation as a
 import time
 
 def initialize_params(X):

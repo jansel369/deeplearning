@@ -1,7 +1,7 @@
 import copy
 import torch as pt
 from .commons import *
-from .Optimizer import *
+from .optimizer import *
 import matplotlib.pyplot as plt
 
 def plot_cost(costs, learning_rate):
@@ -29,7 +29,7 @@ class Model():
         assert output_size == o, 'Invalid output size: ' + str(output_size) + ' : ' + str(o)
 
         # device = pt.device("cuda") if pt.cuda.is_available() else pt.device("cpu")
-        optimizer = self._config['optimization']['optimizer']
+        # optimizer = self._config['optimization']['optimizer']
 
         parameters = init_params(self._config["layers"], device)
 
@@ -39,7 +39,7 @@ class Model():
         
         self._parameters = parameters;
 
-        plot_cost(costs, self._config['optimization']['learning_rate'])
+        plot_cost(costs, self.optimizer.learning_rate)
     
     def evaluate(self, X, Y):
         return predict(X, Y, self._parameters, self._config['layers'])

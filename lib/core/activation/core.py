@@ -1,11 +1,5 @@
 import torch as pt
 
-linear = 'linear'
-sigmoid = 'sigmoid'
-tanh = 'tanh'
-relu = 'relu'
-softmax = 'softmax'
-
 def sigmoid_forward(z):
     return 1 / (1 + pt.exp(-z))
 
