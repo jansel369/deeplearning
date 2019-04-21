@@ -5,6 +5,7 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../lib")
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../datasets")
 
 import neural_net as nn
+from neural_net import architecture as nna
 import torch as pt
 import unittest
 
@@ -63,13 +64,13 @@ class TestNeuralNet(unittest.TestCase):
         display_step = 2
         n = 784
 
-        X = nn.Input(n)
-        X = nn.Layer(50)(X)
-        X = nn.Relu()(X)
-        X = nn.Layer(20)(X)
-        X = nn.Relu()(X)
-        X = nn.Layer(10)(X)
-        X = nn.Softmax()(X)
+        X = nna.input(n)
+        X = nna.layer(50)(X)
+        X = nna.relu()(X)
+        X = nna.layer(20)(X)
+        X = nna.relu()(X)
+        X = nna.layer(10)(X)
+        X = nna.softmax()(X)
 
         X = nn.GradientDescent(learning_rate, training_iteration)(X)
 

@@ -1,5 +1,6 @@
 import torch as pt
-from .commons import *
+# from .commons import *
+import activation as a
 import time
 
 def initialize_params(X):
@@ -15,7 +16,7 @@ def propagate(w, b, X, Y, has_cost=True):
     # Y - output label (1, m)
     m = X.shape[1]
 
-    A = sigmoid(w.t().mm(X) + b)
+    A = a.sigmoid_forward(w.t().mm(X) + b)
     cost =  - (1 / m) * (Y * pt.log(A) + (1 - Y) * pt.log(1 - A)).sum().item() if has_cost else 0
 
     dz = A - Y
@@ -52,7 +53,7 @@ def optimize(w, b, X, Y, iterations, learning_rate, is_printable_cost):
 
 def predict(w, b, X, threshold = 0.5):
 
-    A = sigmoid(w.t().mm(X) + b)
+    A = a.sigmoid_forward(w.t().mm(X) + b)
     Y_pred = A > threshold
 
     return Y_pred.double()

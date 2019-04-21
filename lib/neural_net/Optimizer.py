@@ -1,16 +1,19 @@
 import copy
 
 # from .commons import *
-from commons import *
+# from commons import *
+import activation as a
+import loss as l
 
 activations_dict = {
-    'sigmoid': sigmoid,
-    'relu': relu,
-    'softmax': softmax,
+    'sigmoid': a.sigmoid_forward,
+    'relu': a.relu_forward,
+    'softmax': a.softmax_forward,
 }
 
 costs_dict = {
-    'cross_entropy': compute_cross_entropy_cost,
+    'binary_crossentropy': l.binary_crossentropy_cost,
+    'categorical_crossentropy': l.categorical_crossentropy_cost,
 }
 
 loss_backward_dict = {
@@ -18,13 +21,13 @@ loss_backward_dict = {
     """ Computes layer L gradients
     """
 
-    'sigmoid_cross_entropy': sigmoid_cross_entropy_backward,
-    'softmax_cross_entropy': softmax_cross_entropy_backward,
+    'binary_crossentropy': l.binary_crossentropy_backward,
+    'categorical_crossentoropy': l.categorical_crossentoropy_backward,
 }
 
 activation_backward_dict = {
-    'sigmoid': sigmoid_backward,
-    'relu': relu_backward
+    'sigmoid': a.sigmoid_backward,
+    'relu': a.relu_backward
 }
 
 def predict(X, Y, parameters, layers):
@@ -142,65 +145,39 @@ def update_parameters(parameters, grads, learning_rate):
     
     return parameters
 
-def Adam(learning_reate, batch_size, epoch):
-    def f(config): 
-        config = copy.deepcopy(config)
-        
-        # @todo: finish
-        config['optimization'] = {
-            
-        }
+class GradientDescent():
 
-        return config
+    def __init__(self, learning_rate, iterations, loss):
+        self.learning_rate = learning_rate
+        self.iterations = iterations
+        self.loss = loss
+    
+    def optimize(self, X, Y, parameters, config, is_printable_cost):
+        costs = []
+        layers = config['layers']
 
-    return f
+        compute_cost = costs_dict[self.loss]
+        loss_backward = loss_backward_dict[self.loss]
 
-def GradientDescent(learning_rate, iterations, loss="cross_entropy"):
-    def f(config):
-        config = copy.deepcopy(config)
+        for i in range(self.iterations):
 
-        config['optimization'] = {
-            'optimizer': 'gradient_descent',
-            'learning_rate': learning_rate,
-            'iterations': iterations,
-            'loss': loss,
-        }
+            has_cost = i % 50 == 0
 
-        return config
+            # print(i)
 
-    return f
+            AL, caches = forward_propagation(X, parameters, layers)
 
+            if has_cost:
+                cost = compute_cost(AL, Y)
+                costs.append(cost)
 
-def gradient_descent_optimization(X, Y, parameters, config, is_printable_cost):
-    costs = []
-    optimization = config['optimization']
-    iterations = optimization['iterations']
-    loss = optimization['loss']
-    layers = config['layers']
-    learning_rate = optimization['learning_rate']
+                if is_printable_cost:
+                    print("Cost after iteration %i: %f percent" %(i, cost * 100))
 
-    compute_cost = costs_dict[loss]
-    loss_backward = loss_backward_dict[layers[-1]['activation'] + '_' + loss]
+            dZL = loss_backward(AL, Y)
 
-    for i in range(iterations):
+            grads = backward_propagation(dZL, Y, caches, layers)
 
-        has_cost = i % 50 == 0
+            parameters = update_parameters(parameters, grads, self.learning_rate)
 
-        # print(i)
-
-        AL, caches = forward_propagation(X, parameters, layers)
-
-        if has_cost:
-            cost = compute_cost(AL, Y)
-            costs.append(cost)
-
-            if is_printable_cost:
-                print("Cost after iteration %i: %f percent" %(i, cost * 100))
-
-        dZL = loss_backward(AL, Y)
-
-        grads = backward_propagation(dZL, Y, caches, layers)
-
-        parameters = update_parameters(parameters, grads, learning_rate)
-
-    return parameters, costs
+        return parameters, costs

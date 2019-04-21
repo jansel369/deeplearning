@@ -1,6 +1,7 @@
-from .NeuralNet import *
+# from .NeuralNet import *
 from .test import *
 from .commons import *
-from .Activation import *
+# from .Activation import *
 from .Optimizer import *
 from .Model import *
+import .architecture
