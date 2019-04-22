@@ -3,11 +3,16 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../lib")
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../datasets")
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../utils")
 
 import neural_net as nn
 from neural_net import architecture as nna
 import torch as pt
 import unittest
+from loader import *
+from data_divider import *
+from plot_cost import *
+import matplotlib.pyplot as plt
 
 import mnist.input_data as data_source
 
@@ -36,7 +41,7 @@ class TestNeuralNet(unittest.TestCase):
     #     self.assertEqual(parameters["b2"].shape, (22, 1))
     #     self.assertEqual(parameters["b3"].shape, (1, 1))
 
-    def test_neural_net(self):
+    def _neural_net(self):
         # source reference: https://github.com/llSourcell/tensorflow_demo/blob/master/board.py
 
         mnist = data_source.read_data_sets("datasets/mnist/data/", one_hot=True)
@@ -82,7 +87,31 @@ class TestNeuralNet(unittest.TestCase):
         test_acc = model.evaluate(X_test, Y_test)
 
         print("train accuracy: {} %".format(train_acc))
+        print("train accuracy: {} %".format(train_acc))
         print("test accuracy: {} %".format(test_acc))
+
+    def test_nn2(self):
+        device = nn.get_device()
+        banknote = loader("banknote.csv", device)
+        X_train, Y_train, X_test, Y_test = divide_data(banknote)
+
+        learning_rate = 0.3
+
+        n = X_train.shape[0]
+
+        X = nna.input(n)
+        X = nna.dense(1, 'sigmoid')(X)
+
+        optimizer = nn.GradientDescent(0.3, 1000, nn.binary_crossentropy)
+
+        model = nn.Model(X)
+        model.optimization(optimizer)
+
+        model.fit(X_train, Y_train, True)
+
+        test_acc = model.evaluate(X_test, Y_test)
+        print("test accuracy: {} %".format(test_acc))
+
 
 if __name__ == "__main__":
     unittest.main()

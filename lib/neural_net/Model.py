@@ -40,5 +40,5 @@ class Model():
         plot_cost(costs, self.optimizer.learning_rate)
     
     def evaluate(self, X, Y):
-        return predict(X, Y, self._parameters, self._config['layers'])
+        return predict(X, Y, self._parameters, self._config['layers'], self.optimizer.loss)
     

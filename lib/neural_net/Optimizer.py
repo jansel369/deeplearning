@@ -2,23 +2,24 @@ import copy
 
 # from .commons import *
 # from commons import *
-import core.activation as a
-import core.loss as l
-
-activations_dict = {
-    a.sigmoid: a.sigmoid_forward,
-    a.relu: a.relu_forward,
-    a.softmax: a.softmax_forward,
-}
+# import core.activation as a
+# import core.loss as l
+# import core.propagation as p
+from core import loss as l
+from core import activation as a
+from core import cost
+from core import activation_forward as af
+from core import activation_backward as ab
+from core import gradient
 
 costs_dict = {
-    l.binary_crossentropy: l.binary_crossentropy_cost,
-    l.categorical_crossentropy: l.categorical_crossentropy_cost,
+    l.binary_crossentropy: cost.binary_crossentropy_cost,
+    l.categorical_crossentropy: cost.categorical_crossentropy_cost,
 }
 
 loss_backward_dict = {
-    l.categorical_crossentropy: l.categorical_crossentoropy_backward,
-    l.binary_crossentropy: l.binary_crossentropy_backward,
+    l.categorical_crossentropy: ab.categorical_crossentoropy_backward,
+    l.binary_crossentropy: ab.binary_crossentropy_backward,
 }
 
 activation_backward_dict = {
@@ -26,37 +27,14 @@ activation_backward_dict = {
     a.relu: a.relu_backward
 }
 
-def predict(X, Y, parameters, layers):
-    Al = X
-    L = len(layers)
+predict_accuracy_dict = {
+    l.binary_crossentropy: l.binary_crossentropy_predict_accuracy,
+    l.categorical_crossentropy: l.categorical_crossentoropy_predict_accuracy,
+}
 
+def predict(X, Y, parameters, layers, loss):
 
-    for l in range(1, L):
-        layer = layers[l]
-        A_prev = Al
-
-        Wl = parameters["W" + str(l)]
-        bl = parameters["b" + str(l)]
-
-        Zl = liniar_forward(A_prev, Wl, bl)
-        Al = activation_forward(Zl, layer)
-
-    equality = Al.argmax(1).eq(Y.argmax(1))
-
-    return equality.double().mean() * 100
-
-
-def liniar_forward(A_prev, W, b):
-    Z = W.mm(A_prev) + b
-
-    return Z
-
-def activation_forward(Z, layer):
-    activation = layer['activation']
-
-    A = activations_dict[activation](Z)
-
-    return A
+    return predict_accuracy_dict[loss](X, Y, parameters, layers)
 
 def forward_propagation(X, parameters, layers):
 
@@ -72,8 +50,8 @@ def forward_propagation(X, parameters, layers):
         Wl = parameters["W" + str(l)]
         bl = parameters["b" + str(l)]
 
-        Zl = liniar_forward(A_prev, Wl, bl)
-        Al = activation_forward(Zl, layer)
+        Zl = p.liniar_forward(A_prev, Wl, bl)
+        Al = p.activation_forward(Zl, layer['activation'])
 
         caches.append((A_prev, Wl))
 
