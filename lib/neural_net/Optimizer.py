@@ -80,11 +80,11 @@ def forward_propagation(X, parameters, layers):
     return Al, caches
     
 
-def backward_propagation(dZL, Y, caches, layers):
+def backward_propagation(dZL, caches, layers):
     grads = {}
     dZl = dZL
     # L = len(layers)
-    m = Y.shape[1]
+    m = dZL.shape[1]
 
     for l in reversed(range(len(caches))):
 
@@ -140,11 +140,11 @@ class GradientDescent():
                 costs.append(cost)
 
                 if is_printable_cost:
-                    print("Cost after iteration %i: %f percent" %(i, cost * 100))
+                    print("Cost after iteration %i: %f " %(i, cost))
 
             dZL = loss_backward(AL, Y)
 
-            grads = backward_propagation(dZL, Y, caches, layers)
+            grads = backward_propagation(dZL, caches, layers)
 
             parameters = update_parameters(L, parameters, grads, self.learning_rate)
 

@@ -20,8 +20,8 @@ class Model():
 
     def fit(self, X_train, Y_train, is_printable_cost=False, device=get_device()):
         layers = self._config['layers']
-        input_size = layers[0]['size']
-        output_size = layers[-1]['size']
+        input_size = layers[0]['units']
+        output_size = layers[-1]['units']
         n = X_train.shape[0]
         o = Y_train.shape[0]
 

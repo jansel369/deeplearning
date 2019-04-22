@@ -4,10 +4,10 @@ import core.activation as a
 import copy
 # import optimizer
 
-def create_layer_config(size):
+def create_layer_config(units, activation=''):
     layer = {
-        'size': size,
-        'activation': '',
+        'units': units,
+        'activation': activation,
     }
 
     return layer
@@ -43,7 +43,7 @@ def relu():
 
     return f
 
-def rigmoid():
+def sigmoid():
     def f(config):
         config = copy.deepcopy(config)
         config['layers'][-1]['activation'] = a.sigmoid
@@ -57,6 +57,16 @@ def softmax():
         config = copy.deepcopy(config)
         config['layers'][-1]['activation'] = a.softmax
         
+        return config
+    
+    return f
+
+def dense(units, activation):
+    def f(config):
+        config = copy.deepcopy(config)
+        lc = create_layer_config(units, activation)
+        config['layers'].append(lc)
+
         return config
     
     return f

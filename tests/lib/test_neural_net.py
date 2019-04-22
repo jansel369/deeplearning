@@ -42,8 +42,8 @@ class TestNeuralNet(unittest.TestCase):
         mnist = data_source.read_data_sets("datasets/mnist/data/", one_hot=True)
         device = nn.get_device()
 
-        X_train = nn.from_numpy(mnist.train.images.T, device)
-        Y_train = nn.from_numpy(mnist.train.labels.T, device)
+        X_train = nn.from_numpy(mnist.train.images.T, device)[:, 0:2000]
+        Y_train = nn.from_numpy(mnist.train.labels.T, device)[:, 0:2000]
 
         X_test = nn.from_numpy(mnist.test.images.T, device)
         Y_test = nn.from_numpy(mnist.test.labels.T, device)
@@ -55,20 +55,16 @@ class TestNeuralNet(unittest.TestCase):
         print("validation shape: X=%s, Y=%s" % (X_validation.shape, Y_validation.shape))
         print("test shape: X=%s, Y=%s" % (X_test.shape, Y_test.shape))
 
-
         learning_rate = 0.01
         # batch_size = 100
         # display_step = 2
-        training_iteration = 500
+        training_iteration = 800
         n = X_train.shape[0]
 
         X = nna.input(n)
-        X = nna.layer(50)(X)
-        X = nna.relu()(X)
-        X = nna.layer(20)(X)
-        X = nna.relu()(X)
-        X = nna.layer(10)(X)
-        X = nna.softmax()(X)
+        X = nna.dense(50, 'relu')(X)
+        X = nna.dense(20, 'relu')(X)
+        X = nna.dense(10, 'softmax')(X)
 
         # X = nn.GradientDescent(learning_rate, training_iteration)(X)
         optimizer = nn.GradientDescent(learning_rate, training_iteration, nn.categorical_crossentropy)
@@ -87,7 +83,6 @@ class TestNeuralNet(unittest.TestCase):
 
         print("train accuracy: {} %".format(train_acc))
         print("test accuracy: {} %".format(test_acc))
-    
 
 if __name__ == "__main__":
     unittest.main()

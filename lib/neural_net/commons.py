@@ -6,8 +6,8 @@ def init_params(layers, device=pt.device("cpu")):
     params = {}
 
     for l in range(len(layers) - 1):
-        n = layers[l + 1]["size"]
-        n_prev = layers[l]["size"]
+        n = layers[l + 1]["units"]
+        n_prev = layers[l]["units"]
 
         params["W" + str(l+1)] = pt.randn(n, n_prev, dtype=pt.double, device=device) * 0.01
         params["b" + str(l+1)] = pt.zeros(n, 1, dtype=pt.double, device=device)
