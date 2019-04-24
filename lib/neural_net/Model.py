@@ -3,6 +3,7 @@ import torch as pt
 from .commons import *
 from .optimizer import *
 import matplotlib.pyplot as plt
+from backend import cost
 
 def plot_cost(costs, learning_rate):
     plt.plot(costs)
@@ -39,6 +40,13 @@ class Model():
 
         plot_cost(costs, self.optimizer.learning_rate)
     
-    def evaluate(self, X, Y):
-        return predict(X, Y, self._parameters, self._config['layers'], self.optimizer.loss)
+    def evaluate(self, X, Y, name="evaluate"):
+        accuracy, AL = predict(X, Y, self._parameters, self._config['layers'], self.optimizer.loss)
+        cost = c.costs_dict[self.optimizer.loss](AL, Y)
+
+        print(name)
+        print("-> accuracy: %f" % (accuracy))
+        print("-> cost: %f" %(cost))
+
+        return accuracy, cost
     

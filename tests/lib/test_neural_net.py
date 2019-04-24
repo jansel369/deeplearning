@@ -41,14 +41,15 @@ class TestNeuralNet(unittest.TestCase):
     #     self.assertEqual(parameters["b2"].shape, (22, 1))
     #     self.assertEqual(parameters["b3"].shape, (1, 1))
 
-    def _neural_net(self):
+    def neural_net(self):
         # source reference: https://github.com/llSourcell/tensorflow_demo/blob/master/board.py
+        print("\n------> Test softmax nn: MNIST")
 
         mnist = data_source.read_data_sets("datasets/mnist/data/", one_hot=True)
         device = nn.get_device()
 
-        X_train = nn.from_numpy(mnist.train.images.T, device)[:, 0:2000]
-        Y_train = nn.from_numpy(mnist.train.labels.T, device)[:, 0:2000]
+        X_train = nn.from_numpy(mnist.train.images.T, device)#[:, 0:3000]
+        Y_train = nn.from_numpy(mnist.train.labels.T, device)#[:, 0:3000]
 
         X_test = nn.from_numpy(mnist.test.images.T, device)
         Y_test = nn.from_numpy(mnist.test.labels.T, device)
@@ -60,19 +61,22 @@ class TestNeuralNet(unittest.TestCase):
         print("validation shape: X=%s, Y=%s" % (X_validation.shape, Y_validation.shape))
         print("test shape: X=%s, Y=%s" % (X_test.shape, Y_test.shape))
 
-        learning_rate = 0.01
+        learning_rate = 0.02
         # batch_size = 100
         # display_step = 2
-        training_iteration = 800
+        training_iteration = 7500
         n = X_train.shape[0]
 
         X = nna.input(n)
         X = nna.dense(50, 'relu')(X)
+        # X = nna.dense(50, 'relu')(X)
+        # X = nna.dense(50, 'relu')(X)
+        # X = nna.dense(50, 'relu')(X)
         X = nna.dense(20, 'relu')(X)
         X = nna.dense(10, 'softmax')(X)
 
         # X = nn.GradientDescent(learning_rate, training_iteration)(X)
-        optimizer = nn.GradientDescent(learning_rate, training_iteration, nn.categorical_crossentropy)
+        optimizer = nn.GradientDescent(learning_rate, training_iteration, nn.loss.categorical_crossentropy)
 
         # print("optimiszesr: '%s'" % optimizer.loss)
 
@@ -87,13 +91,16 @@ class TestNeuralNet(unittest.TestCase):
         test_acc = model.evaluate(X_test, Y_test)
 
         print("train accuracy: {} %".format(train_acc))
-        print("train accuracy: {} %".format(train_acc))
         print("test accuracy: {} %".format(test_acc))
 
     def test_nn2(self):
+        print("\n-----> Test logistic regression: banknote")
         device = nn.get_device()
         banknote = loader("banknote.csv", device)
         X_train, Y_train, X_test, Y_test = divide_data(banknote)
+
+        print("\ntrain shape: X=%s, Y=%s" % (X_train.shape, Y_train.shape))
+        print("test shape: X=%s, Y=%s" % (X_test.shape, Y_test.shape))
 
         learning_rate = 0.3
 
@@ -109,8 +116,8 @@ class TestNeuralNet(unittest.TestCase):
 
         model.fit(X_train, Y_train, True)
 
-        test_acc = model.evaluate(X_test, Y_test)
-        print("test accuracy: {} %".format(test_acc))
+        train_acc = model.evaluate(X_train, Y_train, 'train')
+        test_acc = model.evaluate(X_test, Y_test, 'test')
 
 
 if __name__ == "__main__":

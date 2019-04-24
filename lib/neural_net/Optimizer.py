@@ -7,7 +7,7 @@ import copy
 # import core.propagation as p
 from backend import loss as l
 from backend import activation as a
-from backend import cost
+from backend import cost as c
 # from core import activation_forward as af
 # from core import activation_backward as ab
 from backend import gradient as g
@@ -16,11 +16,6 @@ from backend import prediction as pred
 
 # print(l.binary_crossentropy)
 # print(cost.binary_crossentropy_cost)
-
-costs_dict = {
-    l.binary_crossentropy: cost.binary_crossentropy_cost,
-    l.categorical_crossentropy: cost.categorical_crossentropy_cost,
-}
 
 loss_backward_dict = {
     l.categorical_crossentropy: g.categorical_crossentoropy_backward,
@@ -107,12 +102,12 @@ class GradientDescent():
         layers = config['layers']
         L = len(layers)
 
-        compute_cost = costs_dict[self.loss]
+        compute_cost = c.costs_dict[self.loss]
         loss_backward = loss_backward_dict[self.loss]
 
         for i in range(self.iterations):
 
-            has_cost = i % 50 == 0
+            has_cost = i % 100 == 0
 
             # print(i)
 

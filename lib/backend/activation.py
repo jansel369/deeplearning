@@ -15,12 +15,12 @@ def relu_forward(Z):
     
     return Z
 
-def softmax_forward(Z):
+def softmax_forward(Z, ndim=0):
     # e = Z.exp()
     # stable version
-    e = pt.exp(Z - Z.max())
+    e = pt.exp(Z - Z.max(ndim)[0])
 
-    return e / e.sum()
+    return e / e.sum(ndim)
 
 def sigmoid_backward(A):
     # A = cache[0]
