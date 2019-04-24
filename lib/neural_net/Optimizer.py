@@ -5,12 +5,17 @@ import copy
 # import core.activation as a
 # import core.loss as l
 # import core.propagation as p
-from core import loss as l
-from core import activation as a
-from core import cost
-from core import activation_forward as af
-from core import activation_backward as ab
-from core import gradient
+from backend import loss as l
+from backend import activation as a
+from backend import cost
+# from core import activation_forward as af
+# from core import activation_backward as ab
+from backend import gradient as g
+from backend import propagation as p
+from backend import prediction as pred
+
+# print(l.binary_crossentropy)
+# print(cost.binary_crossentropy_cost)
 
 costs_dict = {
     l.binary_crossentropy: cost.binary_crossentropy_cost,
@@ -18,18 +23,18 @@ costs_dict = {
 }
 
 loss_backward_dict = {
-    l.categorical_crossentropy: ab.categorical_crossentoropy_backward,
-    l.binary_crossentropy: ab.binary_crossentropy_backward,
+    l.categorical_crossentropy: g.categorical_crossentoropy_backward,
+    l.binary_crossentropy: g.binary_crossentropy_backward,
 }
 
 activation_backward_dict = {
     a.sigmoid: a.sigmoid_backward,
-    a.relu: a.relu_backward
+    a.relu: a.relu_backward,
 }
 
 predict_accuracy_dict = {
-    l.binary_crossentropy: l.binary_crossentropy_predict_accuracy,
-    l.categorical_crossentropy: l.categorical_crossentoropy_predict_accuracy,
+    l.binary_crossentropy: pred.binary_crossentropy_predict_accuracy,
+    l.categorical_crossentropy: pred.categorical_crossentoropy_predict_accuracy,
 }
 
 def predict(X, Y, parameters, layers, loss):

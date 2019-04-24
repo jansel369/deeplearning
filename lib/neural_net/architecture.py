@@ -1,5 +1,5 @@
 import torch as pt
-import core.activation as a
+from backend import activation as a
 # from .commons import *
 import copy
 # import optimizer

@@ -102,7 +102,7 @@ class TestNeuralNet(unittest.TestCase):
         X = nna.input(n)
         X = nna.dense(1, 'sigmoid')(X)
 
-        optimizer = nn.GradientDescent(0.3, 1000, nn.binary_crossentropy)
+        optimizer = nn.GradientDescent(0.3, 1000, nn.loss.binary_crossentropy)
 
         model = nn.Model(X)
         model.optimization(optimizer)
