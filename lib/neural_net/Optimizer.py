@@ -90,7 +90,7 @@ def update_parameters(L, parameters, grads, learning_rate):
     
     return parameters
 
-class GradientDescent():
+class GradientDescent:
 
     def __init__(self, learning_rate, iterations, loss):
         self.learning_rate = learning_rate

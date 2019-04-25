@@ -93,7 +93,7 @@ class TestNeuralNet(unittest.TestCase):
     def logistic_reg(self):
         print("\n-----> Test logistic regression: banknote")
         device = nn.get_device()
-        banknote = loader("banknote.csv", device)
+        banknote = loader("banknote/data/banknote.csv", device)
         X_train, Y_train, X_test, Y_test = divide_data(banknote)
 
         print("\ntrain shape: X=%s, Y=%s" % (X_train.shape, Y_train.shape))
