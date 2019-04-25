@@ -35,3 +35,8 @@ activations_dict = {
     relu: relu_forward,
     softmax: softmax_forward,
 }
+
+activation_backward_dict = {
+    sigmoid: sigmoid_backward,
+    relu: relu_backward,
+}

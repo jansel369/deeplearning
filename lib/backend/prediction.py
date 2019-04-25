@@ -1,4 +1,5 @@
 from . import propagation as p
+from . import loss as l
 
 def predict(X, parameters, layers):
     Al = X
@@ -28,3 +29,8 @@ def binary_crossentropy_predict_accuracy(X, Y, parameters, layers):
 
     return 100 - (AL - Y).abs().double().mean() * 100, AL
     # return AL.eq(Y).float().mean() * 100
+
+predict_accuracy_dict = {
+    l.binary_crossentropy: binary_crossentropy_predict_accuracy,
+    l.categorical_crossentropy: categorical_crossentoropy_predict_accuracy,
+}
