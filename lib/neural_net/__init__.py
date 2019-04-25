@@ -4,6 +4,7 @@ from .test import *
 from .commons import *
 # from .Activation import *
 from .optimizer import GradientDescent
+from .optimizer import StochasticGradientDescent
 from .Model import Model
 
 # from core.activation.list import *

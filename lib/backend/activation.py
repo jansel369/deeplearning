@@ -23,7 +23,6 @@ def softmax_forward(Z, ndim=0):
     return e / e.sum(ndim)
 
 def sigmoid_backward(A):
-    # A = cache[0]
     # g'(z)
     return A * (1 - A)
 
