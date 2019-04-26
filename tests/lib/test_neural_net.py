@@ -163,8 +163,11 @@ class TestNeuralNet(unittest.TestCase):
 
         learning_rate = 0.009
         batch_size = 64
-        training_iteration = 16
+        training_iteration = 40
         n = X_train.shape[0]
+
+        """ min cost ~ 0.001124
+        """
 
         X = nna.input(n)
         X = nna.dense(50, 'relu')(X)
@@ -177,22 +180,52 @@ class TestNeuralNet(unittest.TestCase):
 
         model.optimization(optimizer)
 
-        model.fit(X_train, Y_train, True)
+        parameters, costs = model.fit(X_train, Y_train, True)
 
         train_acc = model.evaluate(X_train, Y_train, 'train')
         test_acc = model.evaluate(X_test, Y_test, 'test')
 
-    def test_nn_with_rmsprop(self):
+        plot_cost(costs, learning_rate)
+
+    def _nn_with_rmsprop(self):
         print("\n------> Test softmax nn: MNIST")
 
         X_train, Y_train, X_test, Y_test, X_validation, Y_validation = mnist_data()
 
-        learning_rate = 0.09
+        learning_rate = 0.001
         batch_size = 64
-        epochs = 40
+        epochs = 20
         n = X_train.shape[0]
 
-        """ min cost ~ 0.001124
+        X = nna.input(n)
+        X = nna.dense(50, 'relu')(X)
+        X = nna.dense(20, 'relu')(X)
+        X = nna.dense(10, 'softmax')(X)
+
+        optimizer = nn.RMSProp(learning_rate, epochs, batch_size, nn.loss.categorical_crossentropy)
+
+        model = nn.Model(X)
+
+        model.optimization(optimizer)
+
+        parameters, costs = model.fit(X_train, Y_train, True)
+
+        train_acc = model.evaluate(X_train, Y_train, 'train')
+        test_acc = model.evaluate(X_test, Y_test, 'test')
+
+        plot_cost(costs, learning_rate)
+
+    def test_nn_with_adam(self):
+        print("\n------> Test softmax nn: MNIST")
+
+        X_train, Y_train, X_test, Y_test, X_validation, Y_validation = mnist_data()
+
+        learning_rate = 3e-4
+        batch_size = 64
+        epochs = 30
+        n = X_train.shape[0]
+
+        """ min cost ~ 
         """
 
         X = nna.input(n)
@@ -200,7 +233,7 @@ class TestNeuralNet(unittest.TestCase):
         X = nna.dense(20, 'relu')(X)
         X = nna.dense(10, 'softmax')(X)
 
-        optimizer = nn.Momentum(learning_rate, epochs, batch_size, nn.loss.categorical_crossentropy)
+        optimizer = nn.Adam(learning_rate, epochs, batch_size, nn.loss.categorical_crossentropy)
 
         model = nn.Model(X)
 

@@ -7,43 +7,47 @@ from backend import gradient as g
 from backend import propagation as p
 from backend import prediction as pred
 
-def init_rms(parameters):
-    rms = {}
+from .Momentum import init_velocity, update_velocity
+from .RMSProp import init_rms, update_rms
 
-    for param, value in parameters.items():
-        rms["Sd"+param] = pt.zeros(value.shape, dtype=pt.double, device=value.device)
+def velocity_corrected(velocity, beta1):
+    corrected = {}
+    
+    for key, value in velocity.items():
+        corrected[key] = value / (1 - beta1)
+    
+    return corrected
 
-    return rms
+def rms_corrected(rms, beta2):
+    corrected = {}
+    
+    for key, value in rms.items():
+        corrected[key] = value / (1 - beta2)
+    
+    return corrected
 
-def update_rms(grads, rms, B):
-    for grad_k, grad_v in grads.items():
-        vel = "S" + grad_k
-        rms[vel] = B * rms[vel] + (1 - B) * (grad_v ** 2)
-
-    return rms
-
-def update_parameters(L, parameters, grads, rms, learning_rate, epsilon):
+def update_parameters(L, parameters, vel_c, rms_c, learning_rate, epsilon):
     for l in range(1, L):
         l_s = str(l)
 
-        parameters["W"+l_s] -= ( learning_rate *  grads["dW"+l_s] / (rms["SdW"+l_s] + epsilon).sqrt() )
-        parameters["b"+l_s] -= ( learning_rate * grads["db"+l_s] / (rms["Sdb"+l_s] + epsilon).sqrt() ) 
+        parameters["W"+l_s] -= ( learning_rate * vel_c["VdW"+l_s] / (rms_c["SdW"+l_s] + epsilon).sqrt() )
+        parameters["b"+l_s] -= ( learning_rate * vel_c["Vdb"+l_s] / (rms_c["Sdb"+l_s] + epsilon).sqrt() ) 
     
     return parameters
 
-class RMSProp:
-    def __init__(self, learning_rate, iterations, batch_size, loss, beta2=0.9, epsilon=10e-8):
+class Adam:
+    def __init__(self, learning_rate, iterations, batch_size, loss, beta1=0.9, beta2=0.999, epsilon=10e-8):
         self.learning_rate = learning_rate
         self.epochs = iterations
         self.batch_size = batch_size
         self.loss = loss
+        self.beta1 = beta1
         self.beta2 = beta2
         self.epsilon = epsilon
 
     def optimize(self, X, Y, parameters, config, is_printable_cost):
         costs = []
         layers = config['layers']
-        rms = init_rms(parameters)
         L = len(layers)
         m = Y.shape[1]
 
@@ -52,6 +56,9 @@ class RMSProp:
 
         batch_iterations = int(m / self.batch_size)
         count = 0
+
+        velocity = init_velocity(parameters)
+        rms = init_rms(parameters)
 
         for i in range(self.epochs):
 
@@ -76,7 +83,13 @@ class RMSProp:
                 dZL = loss_backward(AL, Y_t)
 
                 grads = p.backward_propagation(dZL, caches, layers)
+                
+                velocity = update_velocity(grads, velocity, self.beta1)
                 rms = update_rms(grads, rms, self.beta2)
-                parameters = update_parameters(L, parameters, grads, rms, self.learning_rate, self.epsilon)
+
+                vel_c = velocity_corrected(velocity, self.beta1)
+                rms_c = rms_corrected(rms, self.beta2)
+
+                parameters = update_parameters(L, parameters, vel_c, rms_c, self.learning_rate, self.epsilon)
         
         return parameters, costs
