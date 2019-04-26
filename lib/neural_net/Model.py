@@ -3,7 +3,8 @@ import torch as pt
 from .commons import *
 from .optimizer import *
 import matplotlib.pyplot as plt
-from backend import cost
+from backend import cost as c
+from backend import prediction as pred
 
 def plot_cost(costs, learning_rate):
     plt.plot(costs)

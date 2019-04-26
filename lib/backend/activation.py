@@ -24,11 +24,13 @@ def softmax_forward(Z, ndim=0):
 
 def sigmoid_backward(A):
     # g'(z)
-    return A * (1 - A)
+    g = A * (1 - A)
+    return g
 
 def relu_backward(A):
     # g'(z)
-    return (A > 0).double()
+    g = (A > 0).double()
+    return g
 
 activations_dict = {
     sigmoid: sigmoid_forward,

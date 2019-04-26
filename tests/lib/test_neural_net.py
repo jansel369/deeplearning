@@ -116,7 +116,7 @@ class TestNeuralNet(unittest.TestCase):
         train_acc = model.evaluate(X_train, Y_train, 'train')
         test_acc = model.evaluate(X_test, Y_test, 'test')
 
-    def test_neural_net_with_stochastic_gd(self):
+    def _neural_net_with_stochastic_gd(self):
         # source reference: https://github.com/llSourcell/tensorflow_demo/blob/master/board.py
         print("\n------> Test softmax nn: MNIST")
 
@@ -136,8 +136,8 @@ class TestNeuralNet(unittest.TestCase):
         print("validation shape: X=%s, Y=%s" % (X_validation.shape, Y_validation.shape))
         print("test shape: X=%s, Y=%s" % (X_test.shape, Y_test.shape))
 
-        learning_rate = 0.01
-        batch_size = 64
+        learning_rate = 0.009
+        batch_size = 32
         training_iteration = 20
         n = X_train.shape[0]
 
@@ -147,6 +147,47 @@ class TestNeuralNet(unittest.TestCase):
         X = nna.dense(10, 'softmax')(X)
 
         optimizer = nn.StochasticGradientDescent(learning_rate, training_iteration, batch_size, nn.loss.categorical_crossentropy)
+
+        model = nn.Model(X)
+
+        model.optimization(optimizer)
+
+        print("fitting model.... device:", device)
+        model.fit(X_train, Y_train, True, device)
+
+        train_acc = model.evaluate(X_train, Y_train, 'train')
+        test_acc = model.evaluate(X_test, Y_test, 'test')
+
+    def test_neural_net_with_momentum(self):
+        print("\n------> Test softmax nn: MNIST")
+
+        mnist = data_source.read_data_sets("datasets/mnist/data/", one_hot=True)
+        device = nn.get_device()
+
+        X_train = nn.from_numpy(mnist.train.images.T, device)#[:, 0:3000]
+        Y_train = nn.from_numpy(mnist.train.labels.T, device)#[:, 0:3000]
+
+        X_test = nn.from_numpy(mnist.test.images.T, device)
+        Y_test = nn.from_numpy(mnist.test.labels.T, device)
+
+        X_validation = nn.from_numpy(mnist.validation.images.T, device)
+        Y_validation = nn.from_numpy(mnist.validation.labels.T, device)
+
+        print("\ntrain shape: X=%s, Y=%s" % (X_train.shape, Y_train.shape))
+        print("validation shape: X=%s, Y=%s" % (X_validation.shape, Y_validation.shape))
+        print("test shape: X=%s, Y=%s" % (X_test.shape, Y_test.shape))
+
+        learning_rate = 0.009
+        batch_size = 64
+        training_iteration = 16
+        n = X_train.shape[0]
+
+        X = nna.input(n)
+        X = nna.dense(50, 'relu')(X)
+        X = nna.dense(20, 'relu')(X)
+        X = nna.dense(10, 'softmax')(X)
+
+        optimizer = nn.Momentum(learning_rate, training_iteration, batch_size, nn.loss.categorical_crossentropy)
 
         model = nn.Model(X)
 

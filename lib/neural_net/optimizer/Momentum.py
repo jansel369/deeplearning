@@ -11,7 +11,7 @@ def init_velocity(parameters):
     velocity = {}
 
     for param, value in parameters.items():
-        velocity[param] = pt.zeros(pt.shape, dtype=pt.double, device=value.device)
+        velocity["Vd"+param] = pt.zeros(value.shape, dtype=pt.double, device=value.device)
 
     return velocity
 

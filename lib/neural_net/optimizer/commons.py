@@ -17,11 +17,6 @@ from backend import prediction as pred
 # print(l.binary_crossentropy)
 # print(cost.binary_crossentropy_cost)
 
-
-def predict(X, Y, parameters, layers, loss):
-
-    return pred.predict_accuracy_dict[loss](X, Y, parameters, layers)
-
 def update_parameters(L, parameters, grads, learning_rate):
     for l in range(1, L):
 

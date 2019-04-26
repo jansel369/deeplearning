@@ -10,7 +10,6 @@ def categorical_crossentoropy_backward(AL, Y):
     """ calculate the gradient
         summary of derivative dz = da/dz.dL/da with softmax
     """
-
     return AL - Y
 
 loss_backward_dict = {
