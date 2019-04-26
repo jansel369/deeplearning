@@ -32,7 +32,7 @@ def update_parameters(L, parameters, grads, prop, learning_rate, epsilon):
     return parameters
 
 class RMSProp:
-    def __init__(self, learning_rate, iterations, batch_size, loss, beta2=0.9, epsilon=10**-8):
+    def __init__(self, learning_rate, iterations, batch_size, loss, beta2=0.9, epsilon=10e-8):
         self.learning_rate = learning_rate
         self.epochs = iterations
         self.batch_size = batch_size

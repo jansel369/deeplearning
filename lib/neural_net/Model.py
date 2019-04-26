@@ -2,16 +2,8 @@ import copy
 import torch as pt
 from .commons import *
 from .optimizer import *
-import matplotlib.pyplot as plt
 from backend import cost as c
 from backend import prediction as pred
-
-def plot_cost(costs, learning_rate):
-    plt.plot(costs)
-    plt.ylabel("costs")
-    plt.xlabel("iterations / 100s")
-    plt.title("Logistic Regression (a=" + str(learning_rate) + ")")
-    plt.show()
 
 class Model():
     def __init__(self, config):
@@ -37,10 +29,11 @@ class Model():
 
         parameters, costs = self.optimizer.optimize(X_train, Y_train, parameters, self._config, is_printable_cost)
         
-        self._parameters = parameters;
+        self._parameters = parameters
 
-        plot_cost(costs, self.optimizer.learning_rate)
-    
+        return parameters, costs
+
+
     def evaluate(self, X, Y, name="evaluate"):
         accuracy, AL = predict(X, Y, self._parameters, self._config['layers'], self.optimizer.loss)
         cost = c.costs_dict[self.optimizer.loss](AL, Y)

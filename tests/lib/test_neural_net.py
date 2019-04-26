@@ -18,6 +18,32 @@ import mnist.input_data as data_source
 
 # def toTensor(np)
 
+def mnist_data():
+    mnist = data_source.read_data_sets("datasets/mnist/data/", one_hot=True)
+    device = nn.get_device()
+
+    X_train = nn.from_numpy(mnist.train.images.T, device)#[:, 0:3000]
+    Y_train = nn.from_numpy(mnist.train.labels.T, device)#[:, 0:3000]
+
+    X_test = nn.from_numpy(mnist.test.images.T, device)
+    Y_test = nn.from_numpy(mnist.test.labels.T, device)
+
+    X_validation = nn.from_numpy(mnist.validation.images.T, device)
+    Y_validation = nn.from_numpy(mnist.validation.labels.T, device)
+
+    print("\ntrain shape: X=%s, Y=%s" % (X_train.shape, Y_train.shape))
+    print("validation shape: X=%s, Y=%s" % (X_validation.shape, Y_validation.shape))
+    print("test shape: X=%s, Y=%s" % (X_test.shape, Y_test.shape))
+
+    return X_train, Y_train, X_test, Y_test, X_validation, Y_validation
+
+def plot_cost(costs, learning_rate):
+    plt.plot(costs)
+    plt.ylabel("costs")
+    plt.xlabel("iterations / 100s")
+    plt.title("neural net (a=" + str(learning_rate) + ")")
+    plt.show()
+
 class TestNeuralNet(unittest.TestCase):
 
     # def test_Input(self):
@@ -44,22 +70,8 @@ class TestNeuralNet(unittest.TestCase):
     def neural_net(self):
         # source reference: https://github.com/llSourcell/tensorflow_demo/blob/master/board.py
         print("\n------> Test softmax nn: MNIST")
-
-        mnist = data_source.read_data_sets("datasets/mnist/data/", one_hot=True)
-        device = nn.get_device()
-
-        X_train = nn.from_numpy(mnist.train.images.T, device)#[:, 0:3000]
-        Y_train = nn.from_numpy(mnist.train.labels.T, device)#[:, 0:3000]
-
-        X_test = nn.from_numpy(mnist.test.images.T, device)
-        Y_test = nn.from_numpy(mnist.test.labels.T, device)
-
-        X_validation = nn.from_numpy(mnist.validation.images.T, device)
-        Y_validation = nn.from_numpy(mnist.validation.labels.T, device)
-
-        print("\ntrain shape: X=%s, Y=%s" % (X_train.shape, Y_train.shape))
-        print("validation shape: X=%s, Y=%s" % (X_validation.shape, Y_validation.shape))
-        print("test shape: X=%s, Y=%s" % (X_test.shape, Y_test.shape))
+        
+        X_train, Y_train, X_test, Y_test, X_validation, Y_validation = mnist_data()
 
         learning_rate = 0.02
         # batch_size = 100
@@ -120,21 +132,7 @@ class TestNeuralNet(unittest.TestCase):
         # source reference: https://github.com/llSourcell/tensorflow_demo/blob/master/board.py
         print("\n------> Test softmax nn: MNIST")
 
-        mnist = data_source.read_data_sets("datasets/mnist/data/", one_hot=True)
-        device = nn.get_device()
-
-        X_train = nn.from_numpy(mnist.train.images.T, device)#[:, 0:3000]
-        Y_train = nn.from_numpy(mnist.train.labels.T, device)#[:, 0:3000]
-
-        X_test = nn.from_numpy(mnist.test.images.T, device)
-        Y_test = nn.from_numpy(mnist.test.labels.T, device)
-
-        X_validation = nn.from_numpy(mnist.validation.images.T, device)
-        Y_validation = nn.from_numpy(mnist.validation.labels.T, device)
-
-        print("\ntrain shape: X=%s, Y=%s" % (X_train.shape, Y_train.shape))
-        print("validation shape: X=%s, Y=%s" % (X_validation.shape, Y_validation.shape))
-        print("test shape: X=%s, Y=%s" % (X_test.shape, Y_test.shape))
+        X_train, Y_train, X_test, Y_test, X_validation, Y_validation = mnist_data()
 
         learning_rate = 0.009
         batch_size = 32
@@ -158,24 +156,10 @@ class TestNeuralNet(unittest.TestCase):
         train_acc = model.evaluate(X_train, Y_train, 'train')
         test_acc = model.evaluate(X_test, Y_test, 'test')
 
-    def test_neural_net_with_momentum(self):
+    def _neural_net_with_momentum(self):
         print("\n------> Test softmax nn: MNIST")
 
-        mnist = data_source.read_data_sets("datasets/mnist/data/", one_hot=True)
-        device = nn.get_device()
-
-        X_train = nn.from_numpy(mnist.train.images.T, device)#[:, 0:3000]
-        Y_train = nn.from_numpy(mnist.train.labels.T, device)#[:, 0:3000]
-
-        X_test = nn.from_numpy(mnist.test.images.T, device)
-        Y_test = nn.from_numpy(mnist.test.labels.T, device)
-
-        X_validation = nn.from_numpy(mnist.validation.images.T, device)
-        Y_validation = nn.from_numpy(mnist.validation.labels.T, device)
-
-        print("\ntrain shape: X=%s, Y=%s" % (X_train.shape, Y_train.shape))
-        print("validation shape: X=%s, Y=%s" % (X_validation.shape, Y_validation.shape))
-        print("test shape: X=%s, Y=%s" % (X_test.shape, Y_test.shape))
+        X_train, Y_train, X_test, Y_test, X_validation, Y_validation = mnist_data()
 
         learning_rate = 0.009
         batch_size = 64
@@ -193,12 +177,41 @@ class TestNeuralNet(unittest.TestCase):
 
         model.optimization(optimizer)
 
-        print("fitting model.... device:", device)
-        model.fit(X_train, Y_train, True, device)
+        model.fit(X_train, Y_train, True)
 
         train_acc = model.evaluate(X_train, Y_train, 'train')
         test_acc = model.evaluate(X_test, Y_test, 'test')
 
+    def test_nn_with_rmsprop(self):
+        print("\n------> Test softmax nn: MNIST")
+
+        X_train, Y_train, X_test, Y_test, X_validation, Y_validation = mnist_data()
+
+        learning_rate = 0.09
+        batch_size = 64
+        epochs = 40
+        n = X_train.shape[0]
+
+        """ min cost ~ 0.001124
+        """
+
+        X = nna.input(n)
+        X = nna.dense(50, 'relu')(X)
+        X = nna.dense(20, 'relu')(X)
+        X = nna.dense(10, 'softmax')(X)
+
+        optimizer = nn.Momentum(learning_rate, epochs, batch_size, nn.loss.categorical_crossentropy)
+
+        model = nn.Model(X)
+
+        model.optimization(optimizer)
+
+        parameters, costs = model.fit(X_train, Y_train, True)
+
+        train_acc = model.evaluate(X_train, Y_train, 'train')
+        test_acc = model.evaluate(X_test, Y_test, 'test')
+
+        plot_cost(costs, learning_rate)
 
 if __name__ == "__main__":
     unittest.main()
