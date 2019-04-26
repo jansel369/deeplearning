@@ -2,8 +2,6 @@
 import torch as pt
 from backend import prediction as pred
 
-# @todo: improve initialization
-
 def predict(X, Y, parameters, layers, loss):
 
     return pred.predict_accuracy_dict[loss](X, Y, parameters, layers)
