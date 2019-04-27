@@ -1,14 +1,21 @@
+"""
+reference: https://ml-cheatsheet.readthedocs.io/en/latest/activation_functions.html
+
+"""
+
 import torch as pt
 
 sigmoid = 'sigmoid'
 tanh = 'tanh'
 relu = 'relu'
 softmax = 'softmax'
+leaky_relu = 'leaky_relu'
+tanh = 'tanh'
 
 leaky_value = 0.01 
 
-def sigmoid_forward(z):
-    return 1 / (1 + pt.exp(-z))
+def sigmoid_forward(Z):
+    return 1 / (1 + pt.exp(-Z))
 
 def relu_forward(Z):
     
@@ -16,10 +23,18 @@ def relu_forward(Z):
     
     return Z
 
-def leaky_relu_forward(z):
+def leaky_relu_forward(Z):
     Z[Z < 0] = Z[Z < 0] * leaky_value
 
     return Z
+
+def tanh_forward(Z):
+    e_p = pt.exp(Z)
+    e_n = pt.exp(-Z)
+    
+    G = (e_p - e_n) / (e_p + e_n)
+
+    return G
 
 def softmax_forward(Z, ndim=0):
     # e = Z.exp()
@@ -45,13 +60,20 @@ def leaky_relu_backward(A):
 
     return G
 
+def tanh_backward(A):
+    return 1 - A.sqrt()
+
 activations_dict = {
     sigmoid: sigmoid_forward,
     relu: relu_forward,
     softmax: softmax_forward,
+    leaky_relu: leaky_relu_forward,
+    tanh: tanh_forward,
 }
 
 activation_backward_dict = {
     sigmoid: sigmoid_backward,
     relu: relu_backward,
+    leaky_relu: leaky_relu_backward,
+    tanh: tanh_backward,
 }
