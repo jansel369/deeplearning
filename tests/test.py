@@ -1,13 +1,13 @@
-import sys
-print(sys.path[1])
-import os
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../lib")
+# import sys
+# print(sys.path[1])
+# import os
+# sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../lib")
 
-print(sys.path)
+# print(sys.path)
 
-import neural_net as test
+# import neural_net as test
 
-test.test()
+# test.test()
 
 # welcome to dongmakgol
 # import lib
@@ -25,3 +25,7 @@ test.test()
 # test.say()
 
 # say()
+def t(test=''):
+    print(test)
+
+t()

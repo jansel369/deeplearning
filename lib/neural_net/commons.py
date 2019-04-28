@@ -1,6 +1,7 @@
 # from commons import *
 import torch as pt
 from backend import prediction as pred
+from backend import initialization as init
 
 def predict(X, Y, parameters, layers, loss):
 
@@ -11,10 +12,15 @@ def init_params(layers, device=pt.device("cpu")):
 
     for l in range(len(layers) - 1):
         n = layers[l + 1]["units"]
-        n_prev = layers[l]["units"]
+        cur_layer = layers[l] 
+        n_prev = cur_layer["units"]
+        initialization = cur_layer['initialization']
 
-        params["W" + str(l+1)] = pt.randn(n, n_prev, dtype=pt.double, device=device) * 0.01
-        params["b" + str(l+1)] = pt.zeros(n, 1, dtype=pt.double, device=device)
+        W = pt.randn(n, n_prev, dtype=pt.double, device=device)
+
+        l_s = str(l+1)
+        params["W" + l_s] = init.init_dict[initialization](W, n, n_prev)
+        params["b" + l_s] = pt.zeros(n, 1, dtype=pt.double, device=device)
     
     return params
 
