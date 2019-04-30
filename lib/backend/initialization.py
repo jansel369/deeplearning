@@ -1,4 +1,5 @@
 """ref: https://www.kdnuggets.com/2018/06/deep-learning-best-practices-weight-initialization.html
+        https://stats.stackexchange.com/questions/373136/softmax-weights-initialization
 """
 
 import torch as pt

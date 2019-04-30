@@ -5,3 +5,4 @@ from . import prediction
 from . import propagation
 from . import loss
 from . import initialization
+from . import parameters

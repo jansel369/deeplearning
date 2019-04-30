@@ -4,6 +4,7 @@ from .commons import *
 from .optimizer import *
 from backend import cost as c
 from backend import prediction as pred
+from backend import parameters as params
 
 class Model():
     def __init__(self, config):
@@ -25,7 +26,7 @@ class Model():
         # device = pt.device("cuda") if pt.cuda.is_available() else pt.device("cpu")
         # optimizer = self._config['optimization']['optimizer']
 
-        parameters = init_params(self._config["layers"], device)
+        parameters = params.init_params(self._config["layers"], device)
 
         parameters, costs = self.optimizer.optimize(X_train, Y_train, parameters, self._config, is_printable_cost)
         

@@ -6,6 +6,7 @@ from backend import cost as c
 from backend import gradient as g
 from backend import propagation as p
 from backend import prediction as pred
+from backend import parameters as params
 
 from .Momentum import init_velocity, update_velocity
 from .RMSProp import init_rms, update_rms
@@ -31,7 +32,7 @@ def update_parameters(L, parameters, vel_c, rms_c, learning_rate, epsilon):
         l_s = str(l)
 
         parameters["W"+l_s] -= ( learning_rate * vel_c["VdW"+l_s] / (rms_c["SdW"+l_s] + epsilon).sqrt() )
-        parameters["b"+l_s] -= ( learning_rate * vel_c["Vdb"+l_s] / (rms_c["Sdb"+l_s] + epsilon).sqrt() ) 
+        parameters["b"+l_s] -= ( learning_rate * vel_c["Vdb"+l_s] / (rms_c["Sdb"+l_s] + epsilon).sqrt() )
     
     return parameters
 

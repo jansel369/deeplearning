@@ -5,8 +5,8 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../lib")
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../datasets")
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../utils")
 
-import neural_net as nn
-from neural_net import architecture as nna
+import  nn
+from nn import architecture as nna
 import torch as pt
 import unittest
 from loader import *
