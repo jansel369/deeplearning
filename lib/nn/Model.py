@@ -6,6 +6,31 @@ from backend import cost as c
 from backend import prediction as pred
 from backend import parameters as params
 
+from . import initialization as init
+
+def initialization_batch_norm_parameters(n, n_prev, device, layer, parameters):
+    if not layer['batch_norm']:
+        return parameters
+
+    new_params = init.batch_norm_layers(n, n_prev, device)
+
+    return (new_params, parameters)
+
+def initialize_parameters(layers, device):
+    # layers = layers.copy
+    parameters = ()
+
+    for l in reversed(range(1, len(layers))):
+        layer = layers[l]
+        n = layer['units']
+        n_prev = layers[l-1]['units']
+        new_params = init.init_dict[layer['initialization']](n, n_prev, device)
+        parameters = (new_params, parameters)
+        parameters = initialization_batch_norm_parameters(n, n_prev, device, layer, parameters)
+    
+    return parameters
+        
+
 class Model():
     def __init__(self, config):
         self._config = copy.deepcopy(config)
@@ -26,7 +51,7 @@ class Model():
         # device = pt.device("cuda") if pt.cuda.is_available() else pt.device("cpu")
         # optimizer = self._config['optimization']['optimizer']
 
-        parameters = params.init_params(self._config["layers"], device)
+        parameters = initialize_parameters(layers, device)
 
         parameters, costs = self.optimizer.optimize(X_train, Y_train, parameters, self._config, is_printable_cost)
         

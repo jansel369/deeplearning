@@ -5,46 +5,54 @@ from backend import parameters
 # from .commons import *
 import copy
 # import optimizer
+from . import propagation
 
-init_by_activation = {
-    a.relu: init.he,
-    a.leaky_relu: init.he,
-    a.softmax: init.glorot,
-    a.sigmoid: init.glorot,
-    a.tanh: init.glorot
-}
+# init_by_activation = {
+#     a.relu: init.he,
+#     a.leaky_relu: init.he,
+#     a.softmax: init.glorot,
+#     a.sigmoid: init.glorot,
+#     a.tanh: init.glorot
+# }
 
-def create_layer_config(units, activation=''):
+def create_layer_config(units, activation='linear'):
     layer = {
         'units': units,
         'activation': activation,
+        'initialization': 'std',
+        'batch_norm': False,
+        'sequence': ['linear']
     }
 
     return layer
 
 def update_layer_config(config, activation, init):
     config = copy.deepcopy(config)
+    layer = config['layers'][-1]
 
-    config['layers'][-1]['activation'] = activation
-    config['layers'][-1]['initialization'] = init
+    layer['activation'] = activation
+    layer['initialization'] = init
+    layer['sequence'].append(activation)
 
     return config
 
 
-def input(size):
-    layer = create_layer_config(size)
+def input(units):
+    layer = create_layer_config(units)
 
     config = {
         'layers': [layer]
+        'forwards': []
     }
 
     return config
 
-def layer(size):
+def layer(units):
     def a(config):
         config = copy.deepcopy(config)
 
-        layer = create_layer_config(size)
+        layer = create_layer_config(units)
+        config['forwards'].append(propagation.liniar_forward)
 
         config["layers"].append(layer)
 
@@ -54,53 +62,66 @@ def layer(size):
 
 def relu(init=init.he):
     def f(config):
-        return update_layer_config(config, a.relu, init)
+        config = update_layer_config(config, a.relu, init)
+        config['forwards'].append(propagation.relu_forward)
 
-    return f
-
-def leaky_relu(init=init.he):
-    def f(config):
-        return update_layer_config(config, a.leaky_relu, init)
+        return config
 
     return f
 
 def sigmoid(init=init.glorot):
     def f(config):
-        return update_layer_config(config, a.sigmoid, init)
+        config = update_layer_config(config, a.sigmoid, init)
+        config['forwards'].append(propagation.sigmoid_forward)
 
-    return f
-
-def tanh(init=init.glorot):
-    def f(config):
-        return update_layer_config(config, a.tanh, init)
-
+        return config
     return f
 
 def softmax(init=init.glorot):
     def f(config):
-        return update_layer_config(config, a.softmax, init)
-    
-    return f
-
-def dense(units, activation, init=''):
-    def f(config):
-        config = copy.deepcopy(config)
-        lc = create_layer_config(units, activation)
-        if init == '':
-            lc['initialization'] = init_by_activation[activation]
-            lc['parameter_type'] = parameters.standard
-
-        config['layers'].append(lc)
+        config = update_layer_config(config, a.softmax, init)
+        config['forwards'].append(propagation.softmax_forward)
 
         return config
-    
     return f
 
 def batch_norm():
     def f(config):
         config = copy.deepcopy(config)
-        config['layers'][-1]['parameter_type'] = parameters.batch_norm
+        l_config = config['layers'][-1]
+        l_config['batch_norm'] = True
+        l_config['sequence'].append('batch_norm')
 
         return config
 
     return f
+
+
+# def leaky_relu(init=init.he):
+#     def f(config):
+#         return update_layer_config(config, a.leaky_relu, init)
+
+#     return f
+
+
+
+# def tanh(init=init.glorot):
+#     def f(config):
+#         return update_layer_config(config, a.tanh, init)
+
+#     return f
+
+# def dense(units, activation, init=''):
+#     def f(config):
+#         config = copy.deepcopy(config)
+#         lc = create_layer_config(units, activation)
+#         if init == '':
+#             lc['initialization'] = init_by_activation[activation]
+#             lc['parameter_type'] = parameters.standard
+
+#         config['layers'].append(lc)
+
+#         return config
+    
+#     return f
+
