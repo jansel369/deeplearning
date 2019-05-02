@@ -41,8 +41,8 @@ def input(units):
     layer = create_layer_config(units)
 
     config = {
-        'layers': [layer]
-        'forwards': []
+        'layers': [layer],
+        'forwards': [],
     }
 
     return config

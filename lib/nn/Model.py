@@ -29,7 +29,7 @@ def initialize_parameters(layers, device):
         parameters = initialization_batch_norm_parameters(n, n_prev, device, layer, parameters)
     
     return parameters
-        
+
 
 class Model():
     def __init__(self, config):
@@ -40,6 +40,7 @@ class Model():
 
     def fit(self, X_train, Y_train, is_printable_cost=False, device=get_device()):
         layers = self._config['layers']
+        forward = self._config['forwards']
         input_size = layers[0]['units']
         output_size = layers[-1]['units']
         n = X_train.shape[0]

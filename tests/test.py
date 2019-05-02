@@ -24,8 +24,18 @@
 
 # test.say()
 
-# say()
-def t(test=''):
-    print(test)
+# # say()
+# def t(test=''):
+#     print(test)
 
-t()
+# t()
+
+# def a():
+#     return 1, 2, 3
+
+# def b(a, b, c):
+#     print(a, b, c)
+
+# b(a())
+
+print(pipe)
