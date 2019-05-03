@@ -24,19 +24,22 @@ def initialize_parameters(layers, device):
         layer = layers[l]
         n = layer['units']
         n_prev = layers[l-1]['units']
+
         new_params = init.init_dict[layer['initialization']](n, n_prev, device)
+
         parameters = (new_params, parameters)
+
         parameters = initialization_batch_norm_parameters(n, n_prev, device, layer, parameters)
     
     return parameters
 
-
 class Model():
-    def __init__(self, config):
+    def __init__(self, config, optimizer):
         self._config = copy.deepcopy(config)
-
-    def optimization(self, optimizer):
         self.optimizer = optimizer
+
+    # def optimization(self, optimizer):
+    #     self.optimizer = optimizer
 
     def fit(self, X_train, Y_train, is_printable_cost=False, device=get_device()):
         layers = self._config['layers']
@@ -54,7 +57,7 @@ class Model():
 
         parameters = initialize_parameters(layers, device)
 
-        parameters, costs = self.optimizer.optimize(X_train, Y_train, parameters, self._config, is_printable_cost)
+        parameters, costs = self.optimizer(X_train, Y_train, parameters, self._config, is_printable_cost)
         
         self._parameters = parameters
 

@@ -37,5 +37,7 @@
 #     print(a, b, c)
 
 # b(a())
+lista = ['a', 'b']
 
-print(pipe)
+for l in lista:
+    print(l)
