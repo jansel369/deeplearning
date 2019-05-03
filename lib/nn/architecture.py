@@ -15,6 +15,9 @@ from . import propagation
 #     a.tanh: init.glorot
 # }
 
+""" Helper functions
+"""
+
 def create_layer_config(units, activation='linear'):
     layer = {
         'units': units,
@@ -37,8 +40,14 @@ def update_layer_config(config, activation, init):
     return config
 
 
+""" liniar functions
+"""
+
 def input(units):
-    layer = create_layer_config(units)
+    layer = {
+        'units': units,
+        'sequence': ['input'],
+    }
 
     config = {
         'layers': [layer],
@@ -59,6 +68,9 @@ def layer(units):
         return config
 
     return a
+
+""" activations functions
+"""
 
 def relu(init=init.he):
     def f(config):

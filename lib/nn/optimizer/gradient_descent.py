@@ -17,21 +17,6 @@ def forward_propagation(forwards, has_cache=False):
 
     return f
 
-def backward_propagation(backwards, loss):
-    grad_loss = g.loss_backward_dict[loss]
-    
-    def f(AL, Y, cache):
-        dZ = grad_loss(AL, Y)
-        cache = None
-        parameters = None
-
-        for backward in backwards:
-            dZ, cache, parameters = backward(dZ, cache, parameters)
-
-        return parameters
-
-    return f
-
 """ constructing backward prop functions
     naming conventins: (activation + '_')<optimizer>_<type>_<method>
 """
@@ -47,7 +32,7 @@ def construct_backwards(layers, learnibng_rate, m):
 
     backwards.append(backward_dict['gr_std_update'])
 
-    for l in reversed(range(1, len(layers)) -1 ):
+    for l in reversed(range(1, len(layers) - 1)):
         layer = layers[l]
         activation = layer['activation']
 
@@ -130,19 +115,37 @@ def liniar_std_grad(activation_backward):
 
     return f
 
+""" Backward propagation
+"""
+
+def backward_propagation(backwards, loss):
+    grad_loss = g.loss_backward_dict[loss]
+    
+    def f(AL, Y, cache):
+        dZ = grad_loss(AL, Y)
+        parameters = (None)
+
+        for backward in backwards:
+            dZ, cache, parameters = backward(dZ, cache, parameters)
+
+        return parameters
+
+    return f
+
 def gradient_descent(learning_rate, iterations, loss):
     compute_cost = c.costs_dict[loss]
 
     def optimizer(X, Y, parameters, config, is_printable_cost):
         costs = []
         layers = config['layers']
-        forwards = config['forwards']
         L = len(layers)
         m = Y.shape[1]
 
+        forwards = config['forwards']
+        print(forwards)
         backwards = construct_backwards(layers, learning_rate, m)
 
-        forward_prop = forward_propagation(forwards, True)
+        forward_prop = forward_propagation(forwards, has_cache=True)
         backward_prop = backward_propagation(backwards, loss)
 
         for i in range(iterations):

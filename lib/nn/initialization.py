@@ -4,12 +4,12 @@ def weight_std(n, n_prev, device):
     return pt.randn(n, n_prev, dtype=pt.double, device=device)
 
 def weight_he(n, n_prev, device):
-    W = weight_std(n n_prev, device)
+    W = weight_std(n, n_prev, device)
 
     return W * ((2 / n_prev) ** 0.5)
 
 def weight_glorot(n, n_prev, device):
-    W = weight_std(n n_prev, device)
+    W = weight_std(n, n_prev, device)
 
     return W * ((1 / n_prev) ** 0.5)
 
