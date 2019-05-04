@@ -141,13 +141,13 @@ class GradientDescent:
         self.loss = loss
 
     def optimize(self, X, Y, parameters, config, is_printable_cost):
-        layers = config['layers']
+        layers = config.layers
         L = len(layers)
         m = Y.shape[1]
 
         cost_evaluator = CostEvaluator(self.loss, self.learning_rate, print_cost=True)
 
-        forwards = config['forwards']
+        forwards = config.forwards
         backwards = construct_backwards(layers, self.learning_rate, m)
 
         forward_prop = p.forward_propagation(forwards, has_cache=True) # set has_cache=True for backprap training

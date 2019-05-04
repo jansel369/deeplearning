@@ -22,10 +22,9 @@ class Model():
         self.parameters = None
 
     def fit(self, X_train, Y_train, is_printable_cost=False, device=get_device()):
-        layers = self.config['layers']
-        forward = self.config['forwards']
-        input_size = layers[0]['units']
-        output_size = layers[-1]['units']
+        layers = self.config.layers
+        input_size = layers[0].units
+        output_size = layers[-1].units
         n = X_train.shape[0]
         o = Y_train.shape[0]
 
@@ -42,7 +41,7 @@ class Model():
 
     def evaluate(self, X, Y, name="evaluate"):
 
-        AL, _ = p.forward_propagation(self.config['forwards'])(X, self.parameters)
+        AL, _ = p.forward_propagation(self.config.forwards)(X, self.parameters)
 
         accuracy = pred_acc.predict_accuracy_dict[self.optimizer.loss](AL, Y)
         cost = c.costs_dict[self.optimizer.loss](AL, Y)

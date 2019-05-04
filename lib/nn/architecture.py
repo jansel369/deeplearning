@@ -7,27 +7,30 @@ import copy
 # import optimizer
 from . import propagation
 
+from collections import namedtuple
+
+
+""" Declare model configuration types
+"""
+
+Config = namedtuple('Config', 'layers, forwards')
+LayerConfig =namedtuple('LayerConfig', 'units, activation, initialization, batch_norm, sequence')
+
 """ Helper functions
 """
 
 def create_layer_config(units, activation='linear'):
-    layer = {
-        'units': units,
-        'activation': activation,
-        'initialization': 'std',
-        'batch_norm': False,
-        'sequence': ['linear']
-    }
+    layer = LayerConfig(units, activation, 'std', False, ['liniar'])
 
     return layer
 
 def update_layer_config(config, activation, init):
-    config = copy.deepcopy(config)
     layer = config['layers'][-1]
 
-    layer['activation'] = activation
-    layer['initialization'] = init
-    layer['sequence'].append(activation)
+    layer = config.layers[-1]
+    layer.activation = activation
+    layer.initialization = init
+    layer.sequence.append(activation)
 
     return config
 
@@ -36,26 +39,17 @@ def update_layer_config(config, activation, init):
 """
 
 def input(units):
-    layer = {
-        'units': units,
-        'sequence': ['input'],
-    }
-
-    config = {
-        'layers': [layer],
-        'forwards': [],
-    }
+    layer = LayerConfig(units, 'liniar', 'std', False, ['input'])
+    config = Config([layer], [])
 
     return config
 
 def layer(units):
     def a(config):
-        config = copy.deepcopy(config)
-
         layer = create_layer_config(units)
-        config['forwards'].append(propagation.liniar_forward)
+        config.forwards.append(propagation.liniar_forward)
 
-        config["layers"].append(layer)
+        config.layers.append(layer)
 
         return config
 
@@ -67,7 +61,7 @@ def layer(units):
 def relu(init=init.he):
     def f(config):
         config = update_layer_config(config, a.relu, init)
-        config['forwards'].append(propagation.relu_forward)
+        config.forwards.append(propagation.relu_forward)
 
         return config
 
@@ -76,7 +70,7 @@ def relu(init=init.he):
 def sigmoid(init=init.glorot):
     def f(config):
         config = update_layer_config(config, a.sigmoid, init)
-        config['forwards'].append(propagation.sigmoid_forward)
+        config.forwards.append(propagation.sigmoid_forward)
 
         return config
     return f
@@ -84,7 +78,7 @@ def sigmoid(init=init.glorot):
 def softmax(init=init.glorot):
     def f(config):
         config = update_layer_config(config, a.softmax, init)
-        config['forwards'].append(propagation.softmax_forward)
+        config.forwards.append(propagation.softmax_forward)
 
         return config
     return f
@@ -92,9 +86,10 @@ def softmax(init=init.glorot):
 def batch_norm():
     def f(config):
         config = copy.deepcopy(config)
-        l_config = config['layers'][-1]
-        l_config['batch_norm'] = True
-        l_config['sequence'].append('batch_norm')
+        
+        layer = config.layers[-1]
+        layer.batch_norm = True
+        layer.sequence.append('batch_norm')
 
         return config
 
