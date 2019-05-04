@@ -2,28 +2,23 @@ from backend import loss as l
 from backend import activation as a
 from backend import cost as c
 from backend import gradient as g
-from backend import propagation as p
-from backend import prediction as pred
+# from backend import propagation as p
+# from backend import prediction as pred
 from . import commons
+from .CostEvaluator import CostEvaluator
 
-def forward_propagation(forwards, has_cache=False):
-    def f(X, parameters):
-        cache = None
-
-        for forward in forwards:
-            X, parameters, cache = forward(X, parameters, has_cache, cache)
-        
-        return X, cache
-
-    return f
+from nn import propagation as p
 
 """ constructing backward prop functions
-    naming conventins: (activation + '_')<optimizer>_<type>_<method>
+    naming format: (activation + '_')<optimizer>_<type>_<method>
 """
 
 def construct_backwards(layers, learnibng_rate, m):
     """ temporary constructor
         todo: batch norm
+        backwards - array of backward functions
+                  - 2 hidden, 1 output layers
+                    - format: [update, liniar_grad, update, liniar_grad, update]
     """
     backwards = []
     backward_dict = { # for caching purposes to avoid creation redundancy
@@ -36,17 +31,19 @@ def construct_backwards(layers, learnibng_rate, m):
         layer = layers[l]
         activation = layer['activation']
 
+        # Add liniar grad calculation
         liniar_fn = activation + '_liniar_std_grad'
-        print(liniar_fn)
-        # add liniar grad calculation
-        if liniar_fn in backward_dict: # use cached function
+
+        if liniar_fn in backward_dict: # resuse cached function
             backwards.append(backward_dict[liniar_fn])
-        else: # cache new function
+        else: # create & cache new function
             backward = liniar_std_grad(a.activation_backward_dict[activation])
             backwards.append(backward)
+
             backward_dict[liniar_fn] = backward
 
-        update_fn = 'gr_std_update'
+        # Add parameter update function
+        update_fn = 'gr_std_update' # temporary
         backwards.append(backward_dict[update_fn])
 
     return backwards
@@ -108,7 +105,7 @@ def liniar_std_grad(activation_backward):
     def compute_liniar_std_grad(dZ, cache, parameters):
         current_cache, next_cache = cache
         A, W_preced, b_preced = current_cache
-        # print('back cache: ', A.shape, W_preced.shape, b_preced.shape)
+        
         dZ = W_preced.t().mm(dZ) * activation_backward(A)
 
         return dZ, next_cache, parameters
@@ -134,61 +131,58 @@ def backward_propagation(backwards, loss):
 
     return f
 
-def gradient_descent(learning_rate, iterations, loss):
-    compute_cost = c.costs_dict[loss]
+""" Optimizer
+"""
+class GradientDescent:
 
-    def optimizer(X, Y, parameters, config, is_printable_cost):
-        costs = []
+    def __init__(self, learning_rate, iterations, loss):
+        self.learning_rate = learning_rate
+        self.iterations = iterations
+        self.loss = loss
+
+    def optimize(self, X, Y, parameters, config, is_printable_cost):
         layers = config['layers']
         L = len(layers)
         m = Y.shape[1]
 
+        cost_evaluator = CostEvaluator(self.loss, self.learning_rate, print_cost=True)
+
         forwards = config['forwards']
-        backwards = construct_backwards(layers, learning_rate, m)
+        backwards = construct_backwards(layers, self.learning_rate, m)
 
-        forward_prop = forward_propagation(forwards, has_cache=True)
-        backward_prop = backward_propagation(backwards, loss)
+        forward_prop = p.forward_propagation(forwards, has_cache=True) # set has_cache=True for backprap training
+        backward_prop = backward_propagation(backwards, self.loss)
 
-        for i in range(iterations):
-            has_cost = i % 99 == 0
+        for i in range(self.iterations):
 
             AL, cache = forward_prop(X, parameters)
 
-            if has_cost:
-                cost = compute_cost(AL, Y)
-                costs.append(cost)
-
-                if is_printable_cost:
-                    print("Cost after iteration %i: %f " % (i, cost))
-
             parameters = backward_prop(AL, Y, cache)
-            # if (has_cost):
-            #     f_prop_cache_debugger(cache)
-            #     b_prop_params_debugger(parameters)
-        return parameters, costs
 
-    return optimizer
+            cost_evaluator.add_cost(i, AL, Y)
 
-def f_prop_cache_debugger(cache):
-    # curr_c, next_c = cache
-    counter = 1
+        return parameters, cost_evaluator
 
-    while cache != None:
-        curr_c, next_c = cache
-        A_p, W, b = curr_c
-        print(counter, A_p.shape, W.shape, b.shape)
-        counter += 1
+# def f_prop_cache_debugger(cache):
+#     # curr_c, next_c = cache
+#     counter = 1
 
-        cache = next_c
+#     while cache != None:
+#         curr_c, next_c = cache
+#         A_p, W, b = curr_c
+#         print(counter, A_p.shape, W.shape, b.shape)
+#         counter += 1
 
-def b_prop_params_debugger(cache):
-# curr_c, next_c = cache
-    counter = 1
+#         cache = next_c
 
-    while cache != None:
-        curr_c, next_c = cache
-        W, b = curr_c
-        print(counter,  W.shape, b.shape)
-        counter += 1
+# def b_prop_params_debugger(cache):
+# # curr_c, next_c = cache
+#     counter = 1
 
-        cache = next_c
+#     while cache != None:
+#         curr_c, next_c = cache
+#         W, b = curr_c
+#         print(counter,  W.shape, b.shape)
+#         counter += 1
+
+#         cache = next_c

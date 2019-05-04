@@ -1,25 +1,29 @@
 import copy
 import torch as pt
+from collections import namedtuple
+
 from .commons import *
 from .optimizer import *
 from backend import cost as c
-from backend import prediction as pred
+# from backend import prediction as pred
+
+from backend import pred_acc
 
 from . import parameters as params
 from . import initialization as init
+from . import propagation as p
 
+# _Model = namedtuple('Model', 'fit, evaluate')
 
 class Model():
     def __init__(self, config, optimizer):
-        self._config = copy.deepcopy(config)
+        self.config = config
         self.optimizer = optimizer
-
-    # def optimization(self, optimizer):
-    #     self.optimizer = optimizer
+        self.parameters = None
 
     def fit(self, X_train, Y_train, is_printable_cost=False, device=get_device()):
-        layers = self._config['layers']
-        forward = self._config['forwards']
+        layers = self.config['layers']
+        forward = self.config['forwards']
         input_size = layers[0]['units']
         output_size = layers[-1]['units']
         n = X_train.shape[0]
@@ -28,20 +32,19 @@ class Model():
         assert input_size == n, 'Invalid input size: ' + str(input_size) + ' : ' + str(n)
         assert output_size == o, 'Invalid output size: ' + str(output_size) + ' : ' + str(o)
 
-        # device = pt.device("cuda") if pt.cuda.is_available() else pt.device("cpu")
-        # optimizer = self._config['optimization']['optimizer']
-
         parameters = params.initialize_parameters(layers, device)
-
-        parameters, costs = self.optimizer(X_train, Y_train, parameters, self._config, is_printable_cost)
+        parameters, cost_evaluator = self.optimizer(X_train, Y_train, parameters, self.config, is_printable_cost)
         
-        self._parameters = parameters
+        self.parameters = parameters
 
-        return parameters, costs
+        return parameters, cost_evaluator
 
 
     def evaluate(self, X, Y, name="evaluate"):
-        accuracy, AL = predict(X, Y, self._parameters, self._config['layers'], self.optimizer.loss)
+
+        AL, _ = p.forward_propagation(self.config['forwards'])(X, self.parameters)
+
+        accuracy = pred_acc.predict_accuracy_dict[self.optimizer.loss](AL, Y)
         cost = c.costs_dict[self.optimizer.loss](AL, Y)
 
         print(name)
@@ -49,4 +52,15 @@ class Model():
         print("-> cost: %f" %(cost))
 
         return accuracy, cost
+    
+
+
+# class Model():
+#     def __init__(self, config, optimizer):
+#         self._config = copy.deepcopy(config)
+#         self.optimizer = optimizer
+
+    # def optimization(self, optimizer):
+    #     self.optimizer = optimizer
+
     

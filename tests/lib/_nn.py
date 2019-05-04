@@ -35,13 +35,6 @@ def mnist_data():
 
     return X_train, Y_train, X_test, Y_test, X_validation, Y_validation
 
-def plot_cost(costs, learning_rate):
-    plt.plot(costs)
-    plt.ylabel("costs")
-    plt.xlabel("iterations / 100s")
-    plt.title("neural net (a=" + str(learning_rate) + ")")
-    plt.show()
-
 print("\n------> Test softmax nn: MNIST")
         
 X_train, Y_train, X_test, Y_test, X_validation, Y_validation = mnist_data()
@@ -72,9 +65,9 @@ model = nn.Model(X, optimizer)
 
 print("fitting model....")
 
-parameters, costs = model.fit(X_train, Y_train, True)
+parameters, cost_evaluator = model.fit(X_train, Y_train, True)
 
-plot_cost(costs, learning_rate)
+train_acc = model.evaluate(X_train, Y_train, 'train')
+test_acc = model.evaluate(X_test, Y_test, 'test')
 
-# train_acc = model.evaluate(X_train, Y_train, 'train')
-# test_acc = model.evaluate(X_test, Y_test, 'test')
+cost_evaluator.plot_cost()

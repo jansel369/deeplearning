@@ -7,14 +7,6 @@ import copy
 # import optimizer
 from . import propagation
 
-# init_by_activation = {
-#     a.relu: init.he,
-#     a.leaky_relu: init.he,
-#     a.softmax: init.glorot,
-#     a.sigmoid: init.glorot,
-#     a.tanh: init.glorot
-# }
-
 """ Helper functions
 """
 

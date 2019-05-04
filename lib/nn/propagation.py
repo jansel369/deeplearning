@@ -69,3 +69,17 @@ def liniar_grad(activation_backward):
 
 def activation_grad(W, dZ):
     return W.t().mm(dZ)
+
+""" Runs all forward propagations
+"""
+
+def forward_propagation(forwards, has_cache=False):
+    def forward_prop(X, parameters):
+        cache = None
+
+        for forward in forwards:
+            X, parameters, cache = forward(X, parameters, has_cache, cache)
+        
+        return X, cache
+
+    return forward_prop
