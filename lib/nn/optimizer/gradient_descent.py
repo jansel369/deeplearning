@@ -37,12 +37,12 @@ def construct_backwards(layers, learnibng_rate, m):
         activation = layer['activation']
 
         liniar_fn = activation + '_liniar_std_grad'
-
+        print(liniar_fn)
         # add liniar grad calculation
         if liniar_fn in backward_dict: # use cached function
             backwards.append(backward_dict[liniar_fn])
         else: # cache new function
-            backward = liniar_std_grad(a.activations_dict[activation])
+            backward = liniar_std_grad(a.activation_backward_dict[activation])
             backwards.append(backward)
             backward_dict[liniar_fn] = backward
 
@@ -105,15 +105,15 @@ def gr_std_update(learning_rate, m):
 """
 
 def liniar_std_grad(activation_backward):
-    def f(dZ, cache, parameters):
+    def compute_liniar_std_grad(dZ, cache, parameters):
         current_cache, next_cache = cache
         A, W_preced, b_preced = current_cache
-
+        # print('back cache: ', A.shape, W_preced.shape, b_preced.shape)
         dZ = W_preced.t().mm(dZ) * activation_backward(A)
 
         return dZ, next_cache, parameters
 
-    return f
+    return compute_liniar_std_grad
 
 """ Backward propagation
 """
@@ -122,10 +122,12 @@ def backward_propagation(backwards, loss):
     grad_loss = g.loss_backward_dict[loss]
     
     def f(AL, Y, cache):
-        dZ = grad_loss(AL, Y)
-        parameters = (None)
+        parameters = None
 
+        dZ = grad_loss(AL, Y)
         for backward in backwards:
+            # print('running backward: ', backward.__name__)
+
             dZ, cache, parameters = backward(dZ, cache, parameters)
 
         return parameters
@@ -142,14 +144,13 @@ def gradient_descent(learning_rate, iterations, loss):
         m = Y.shape[1]
 
         forwards = config['forwards']
-        print(forwards)
         backwards = construct_backwards(layers, learning_rate, m)
 
         forward_prop = forward_propagation(forwards, has_cache=True)
         backward_prop = backward_propagation(backwards, loss)
 
         for i in range(iterations):
-            has_cost = i % 100 == 0
+            has_cost = i % 99 == 0
 
             AL, cache = forward_prop(X, parameters)
 
@@ -161,7 +162,33 @@ def gradient_descent(learning_rate, iterations, loss):
                     print("Cost after iteration %i: %f " % (i, cost))
 
             parameters = backward_prop(AL, Y, cache)
-
+            # if (has_cost):
+            #     f_prop_cache_debugger(cache)
+            #     b_prop_params_debugger(parameters)
         return parameters, costs
 
     return optimizer
+
+def f_prop_cache_debugger(cache):
+    # curr_c, next_c = cache
+    counter = 1
+
+    while cache != None:
+        curr_c, next_c = cache
+        A_p, W, b = curr_c
+        print(counter, A_p.shape, W.shape, b.shape)
+        counter += 1
+
+        cache = next_c
+
+def b_prop_params_debugger(cache):
+# curr_c, next_c = cache
+    counter = 1
+
+    while cache != None:
+        curr_c, next_c = cache
+        W, b = curr_c
+        print(counter,  W.shape, b.shape)
+        counter += 1
+
+        cache = next_c

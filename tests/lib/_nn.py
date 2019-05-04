@@ -46,13 +46,13 @@ print("\n------> Test softmax nn: MNIST")
         
 X_train, Y_train, X_test, Y_test, X_validation, Y_validation = mnist_data()
 
-X_train = X_train[:, 0:3000]
-Y_train = Y_train[:, 0:3000]
+X_train = X_train[:, 0:5000]
+Y_train = Y_train[:, 0:5000]
 
-learning_rate = 0.01
+learning_rate = 0.001
 # batch_size = 100
 # display_step = 2
-training_iteration = 1
+training_iteration = 7000
 n = X_train.shape[0]
 loss = nn.loss.categorical_crossentropy
 

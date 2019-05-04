@@ -28,24 +28,22 @@ def relu_forward(Z, params, has_cache, cache):
     return Z, params, cache
 
 def softmax_forward(Z, params, has_cache, cache):
-    # print('Z', Z)
-    # print('parmas', params)
-    # print('has_cache; ', has_cache)
-    # print('cache', cache)
-
     e = pt.exp(Z - Z.max(0)[0])
+    relu = e / e.sum(0)
 
-    return e / e.sum(0), params, cache
+    return relu, params, cache
 
 def sigmoid_forward(Z, params, has_cache, cache):
-    return 1 / (1 + pt.exp(-Z)), params, cache
+    sigmoid = 1 / (1 + pt.exp(-Z))
+
+    return sigmoid, params, cache
 
 """ activation backward
 """
 
 def relu_backward(A):
-    # g'(z)
     g = (A > 0).double()
+
     return g
 
 # def softmax_forward(Z, ndim=0):
