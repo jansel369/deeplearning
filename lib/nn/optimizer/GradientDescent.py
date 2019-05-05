@@ -54,12 +54,12 @@ update_dict = {
 
 class GradientDescent:
 
-    def __init__(self, learning_rate, iterations, loss):
+    def __init__(self, learning_rate, loss, iterations):
         self.learning_rate = learning_rate
         self.iterations = iterations
         self.loss = loss
 
-    def optimize(self, X, Y, parameters, config, is_printable_cost):
+    def optimize(self, X, Y, parameters, config, is_printable_cost, update_dict=update_dict):
         layers = config.layers
         L = len(layers)
         m = Y.shape[1]

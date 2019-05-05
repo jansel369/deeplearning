@@ -45,29 +45,18 @@ def construct_backwards(update_dict, layers, learnibng_rate, m):
     """
 
     backwards = []
-    backward_dict = { # for caching purposes to avoid creation redundancy
-        'std_update': update_dict['std_update'](learnibng_rate, m),
-    }
-
-    backwards.append(backward_dict['std_update'])
+    # add first update backward
+    backwards.append(update_dict['std_update'](learnibng_rate, m))
 
     for l in reversed(range(1, len(layers) - 1)):
         layer = layers[l]
         activation = layer.activation
 
-        # Add liniar grad calculation
-        liniar_fn = activation + '_liniar_std_grad'
-
-        if liniar_fn in backward_dict: # resuse cached function
-            backwards.append(backward_dict[liniar_fn])
-        else: # create & cache new function
-            backward = liniar_std_grad(a.activation_backward_dict[activation])
-            backwards.append(backward)
-
-            backward_dict[liniar_fn] = backward
+        # add next grad calculation
+        backwards.append(liniar_std_grad(a.activation_backward_dict[activation]))
 
         # Add parameter update function
-        backwards.append(backward_dict['std_update'])
+        backwards.append(update_dict['std_update'](learnibng_rate, m))
 
     return backwards
 

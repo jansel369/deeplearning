@@ -5,19 +5,21 @@ from backend import activation as a
 from nn import propagation as p
 # from backend import prediction as pred
 
+from .GradientDescent import GradientDescent
+
 from . import commons as c
 from .GradientDescent import update_dict
 
 from nn.CostEvaluator import CostEvaluator
 
-class StochasticGradientDescent:
-    def __init__(self, learning_rate, epochs, batch_size, loss):
-        self.learning_rate = learning_rate
-        self.epochs = epochs
+# def stochastic_run(X, Y, parameters,)
+
+class StochasticGradientDescent(GradientDescent):
+    def __init__(self, learning_rate, loss, epochs, batch_size):
+        super().__init__(learning_rate, loss, epochs)
         self.batch_size = batch_size
-        self.loss = loss
     
-    def optimize(self, X, Y, parameters, config, is_printable_cost):
+    def optimize(self, X, Y, parameters, config, is_printable_cost, update_dict=update_dict):
         layers = config.layers
         m = Y.shape[1]
         batch_count = int(m / self.batch_size)
@@ -33,7 +35,7 @@ class StochasticGradientDescent:
         X_batches = X.split(self.batch_size, 1)
         Y_batches = Y.split(self.batch_size, 1)
 
-        for i in range(self.epochs):
+        for i in range(self.iterations): # iterations refers to epochs
             for t in range(batch_count):
                 X_b = X_batches[t]
                 Y_b = Y_batches[t]

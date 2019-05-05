@@ -37,7 +37,25 @@
 #     print(a, b, c)
 
 # b(a())
-lista = ['a', 'b']
+def a():
+    d = {
+        'a': 0
+    }
+    v = 0
+    m = 0
+    def b():
+        # v = v + 1
 
-for l in lista:
-    print(l)
+        d['a'] += 1
+        nonlocal v, m
+        v += 1
+        m += 1
+        print(d)
+        print(v, m)
+    
+    return b
+
+t = a()
+
+t()
+t()
