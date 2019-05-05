@@ -25,15 +25,14 @@ def create_layer_config(units, activation='linear'):
     return layer
 
 def update_layer_config(config, activation, init):
-    layer = config['layers'][-1]
-
     layer = config.layers[-1]
-    layer.activation = activation
-    layer.initialization = init
-    layer.sequence.append(activation)
+
+    units, _, _, batch_norm, sequence = layer
+    sequence.append(activation)
+
+    config.layers[-1] = LayerConfig(units, activation, init, batch_norm, sequence)
 
     return config
-
 
 """ liniar functions
 """

@@ -5,7 +5,7 @@ from backend import gradient as g
 # from backend import propagation as p
 # from backend import prediction as pred
 from . import commons
-from .CostEvaluator import CostEvaluator
+from nn.CostEvaluator import CostEvaluator
 
 from nn import propagation as p
 
@@ -29,7 +29,7 @@ def construct_backwards(layers, learnibng_rate, m):
 
     for l in reversed(range(1, len(layers) - 1)):
         layer = layers[l]
-        activation = layer['activation']
+        activation = layer.activation
 
         # Add liniar grad calculation
         liniar_fn = activation + '_liniar_std_grad'

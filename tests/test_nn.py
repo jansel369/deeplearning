@@ -1,8 +1,8 @@
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../lib")
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../datasets")
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../../utils")
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../lib")
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../datasets")
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../utils")
 
 import  nn
 from nn import architecture as nna
@@ -59,7 +59,7 @@ X = relu(X)
 X = nna.layer(10)(X)
 X = nna.softmax()(X)
 
-optimizer = nn.gradient_descent(learning_rate, training_iteration, loss)
+optimizer = nn.optimizer.GradientDescent(learning_rate, training_iteration, loss)
 
 model = nn.Model(X, optimizer)
 

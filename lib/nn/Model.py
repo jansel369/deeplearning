@@ -7,7 +7,7 @@ from .optimizer import *
 from backend import cost as c
 # from backend import prediction as pred
 
-from backend import pred_acc
+from backend import accuracy as pred_acc
 
 from . import parameters as params
 from . import initialization as init
@@ -32,7 +32,7 @@ class Model():
         assert output_size == o, 'Invalid output size: ' + str(output_size) + ' : ' + str(o)
 
         parameters = params.initialize_parameters(layers, device)
-        parameters, cost_evaluator = self.optimizer(X_train, Y_train, parameters, self.config, is_printable_cost)
+        parameters, cost_evaluator = self.optimizer.optimize(X_train, Y_train, parameters, self.config, is_printable_cost)
         
         self.parameters = parameters
 

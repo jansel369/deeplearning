@@ -12,7 +12,7 @@ from backend import cost as c
 # from core import activation_backward as ab
 from backend import gradient as g
 from backend import propagation as p
-from backend import prediction as pred
+# from backend import prediction as pred
 
 # print(l.binary_crossentropy)
 # print(cost.binary_crossentropy_cost)
