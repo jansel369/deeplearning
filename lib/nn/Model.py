@@ -1,6 +1,8 @@
 import copy
 import torch as pt
 from collections import namedtuple
+import time
+import datetime
 
 from .commons import *
 from .optimizer import *
@@ -31,10 +33,15 @@ class Model():
         assert input_size == n, 'Invalid input size: ' + str(input_size) + ' : ' + str(n)
         assert output_size == o, 'Invalid output size: ' + str(output_size) + ' : ' + str(o)
 
+        start_time = time.time() # trainig timer
+
         parameters = params.initialize_parameters(layers, device)
         parameters, cost_evaluator = self.optimizer.optimize(X_train, Y_train, parameters, self.config, is_printable_cost)
         
         self.parameters = parameters
+
+        end_time = time.time()
+        print("Training time: ", datetime.timedelta(seconds=end_time - start_time))
 
         return parameters, cost_evaluator
 

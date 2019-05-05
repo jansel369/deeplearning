@@ -11,8 +11,9 @@ class CostEvaluator:
         self.compute_cost = c.costs_dict[loss]
         self.print_cost = print_cost
         self.learning_rate = learning_rate
+        self.stochastic_iterations = 0
 
-    def add_cost(self, count, AL, Y):
+    def batch_cost(self, count, AL, Y):
         if count % self.alternation != 0:
             return
         
@@ -21,6 +22,18 @@ class CostEvaluator:
 
         if self.print_cost:
             print("Cost after iteration %i: %f " % (count, cost))
+
+    def stochastic_cost(self, iteration, batch, AL, Y):
+        self.stochastic_iterations += 1
+
+        if self.stochastic_iterations % self.alternation != 0:
+            return
+        
+        cost = self.compute_cost(AL, Y)
+        self.costs.append(cost)
+
+        if self.print_cost:
+            print("Cost after iteration %i, batch %i: %f " % (iteration, batch, cost))
 
     def plot_cost(self):
         plt.plot(self.costs)

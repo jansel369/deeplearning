@@ -1,59 +1,47 @@
-from backend import loss as l
+# from backend import loss as l
 from backend import activation as a
-from backend import cost as c
-from backend import gradient as g
-from backend import propagation as p
-from backend import prediction as pred
+# from backend import cost as c
+# from backend import gradient as g
+from nn import propagation as p
+# from backend import prediction as pred
 
-from . import commons
+from . import commons as c
+from .GradientDescent import update_dict
+
+from nn.CostEvaluator import CostEvaluator
 
 class StochasticGradientDescent:
-    def __init__(self, learning_rate, iterations, batch_size, loss):
+    def __init__(self, learning_rate, epochs, batch_size, loss):
         self.learning_rate = learning_rate
-        self.epochs = iterations
+        self.epochs = epochs
         self.batch_size = batch_size
         self.loss = loss
     
     def optimize(self, X, Y, parameters, config, is_printable_cost):
-        costs = []
-        layers = config['layers']
-        L = len(layers)
-        m = Y.shape[1 ]
+        layers = config.layers
+        m = Y.shape[1]
+        batch_count = int(m / self.batch_size)
 
-        compute_cost = c.costs_dict[self.loss]
-        loss_backward = g.loss_backward_dict[self.loss]
+        cost_evaluator = CostEvaluator(self.loss, self.learning_rate, print_cost=is_printable_cost)
 
-        batch_iterations = int(m / self.batch_size)
-        count = 0
+        forwards = config.forwards
+        backwards = c.construct_backwards(update_dict, layers, self.learning_rate, self.batch_size)
+
+        forward_prop = p.forward_propagation(forwards, has_cache=True) # set has_cache=True for backprap training
+        backward_prop = c.backward_propagation(backwards, self.loss)
+
+        X_batches = X.split(self.batch_size, 1)
+        Y_batches = Y.split(self.batch_size, 1)
 
         for i in range(self.epochs):
+            for t in range(batch_count):
+                X_b = X_batches[t]
+                Y_b = Y_batches[t]
 
-            for t in range(batch_iterations):
-                batch_start = t * self.batch_size
-                batch_end = batch_start + self.batch_size
+                AL, cache = forward_prop(X, parameters)
 
-                X_t = X[:, batch_start:batch_end]
-                Y_t = Y[:, batch_start:batch_end]
+                parameters = backward_prop(AL, Y, cache)
+                
+                cost_evaluator.stochastic_cost(i, t, AL, Y)
 
-                # print(X_t.shape)
-                # print(Y_t.shape)
-
-                AL, caches = p.forward_propagation(X_t, parameters, layers)
-                # print(AL.shape)
-
-                count += 1
-                has_cost = count % 100 == 0
-                if has_cost:
-                    cost = compute_cost(AL, Y_t)
-                    costs.append(cost)
-
-                    if is_printable_cost:
-                        print("Cost after epoch: %i, batch: %i, : %f " %(i+1, t+1, cost))
-
-                dZL = loss_backward(AL, Y_t)
-
-                grads = p.backward_propagation(dZL, caches, layers)
-
-                parameters = commons.update_parameters(L, parameters, grads, self.learning_rate)
-        
-        return parameters, costs
+        return parameters, cost_evaluator

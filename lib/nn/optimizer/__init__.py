@@ -1,1 +1,2 @@
 from .GradientDescent import GradientDescent
+from .StochasticGradientDeschent import StochasticGradientDescent
