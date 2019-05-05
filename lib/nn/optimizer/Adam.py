@@ -25,13 +25,14 @@ def std_update(beta1, beta2, epsilon):
         Vdb = 0
         SdW = 0
         Sdb = 0
+        t = 1 # iteration
 
         def update(dZ, cache, parameters):
             """Adam standard update
                 cache - tuple cache: ((A_prev, W, b), ((next_cache, ...)))
                 parameters - tuple updated parameters: ((W, b), ((prev_params, ...)))
             """
-            nonlocal SdW, Sdb, VdW, Vdb
+            nonlocal SdW, Sdb, VdW, Vdb, t
 
             current_cache, next_cache = cache
             A_prev, W, b = current_cache
@@ -39,14 +40,24 @@ def std_update(beta1, beta2, epsilon):
             dW = weight_grad(dZ, A_prev)
             db = bias_grad(dZ)
 
+            VdW = vel_weight(VdW, dW)
+            Vdb = vel_bias(Vdb, db)
+
+            vcn = 1 - (beta1 ** t)
+            VdW_c = VdW / vcn # _c: corrected
+            Vdb_c = Vdb / vcn
+
             SdW = prop_weight(SdW, dW)
             Sdb = prop_bias(Sdb, db)
 
-            SdW = beta2 * SdW + (1 - beta2) * (dW ** 2)
-            Sdb = beta2 * Sdb + (1 - beta2) * (db ** 2)
+            scn = 1 - (beta2 ** t)
+            SdW_c = SdW / scn
+            Sdb_c = Sdb / scn
 
-            W -= learning_rate * ( dW / (SdW + epsilon).sqrt() )
-            b -= learning_rate * ( db / (Sdb + epsilon).sqrt() )
+            W -= learning_rate * ( VdW_c / (SdW_c + epsilon).sqrt() )
+            b -= learning_rate * ( Vdb_c / (Sdb_c + epsilon).sqrt() )
+
+            t += 1 # update t by 1 per iteration
 
             return dZ, cache, ((W, b), parameters)
 
@@ -55,8 +66,8 @@ def std_update(beta1, beta2, epsilon):
     return adam_update
 
 class Adam(StochasticGradientDescent):
-    def __init__(self, learning_rate, loss, epochs, batch_size, beta1=0.9, beta2=0.9, epsilon=10e-8):
-        super().__init__(learning_rate, loss, epochs, batch_size)
+    def __init__(self, loss, epochs, batch_size=64, learning_rate=3e-4, beta1=0.9, beta2=0.999, epsilon=10e-8):
+        super().__init__(loss, epochs, batch_size, learning_rate)
         self.beta1 = beta1
         self.beta2 = beta2
         self.epsilon = epsilon

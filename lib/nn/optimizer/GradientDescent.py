@@ -40,7 +40,7 @@ update_dict = {
 
 class GradientDescent:
 
-    def __init__(self, learning_rate, loss, iterations):
+    def __init__(self, loss, iterations, learning_rate=0.01):
         self.learning_rate = learning_rate
         self.iterations = iterations
         self.loss = loss

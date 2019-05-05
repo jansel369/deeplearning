@@ -57,8 +57,8 @@ def std_update(beta2, epsilon):
     return rms_update
 
 class RMSProp(StochasticGradientDescent):
-    def __init__(self, learning_rate, loss, epochs, batch_size, beta2=0.9, epsilon=10e-8):
-        super().__init__(learning_rate, loss, epochs, batch_size)
+    def __init__(self, loss, epochs, batch_size=64, learning_rate=0.001, beta2=0.9, epsilon=10e-8):
+        super().__init__(loss, epochs, batch_size, learning_rate)
         self.beta2 = beta2
         self.epsilon = epsilon
 

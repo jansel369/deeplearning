@@ -62,8 +62,8 @@ def std_update(beta):
     return moment_update
 
 class Momentum(StochasticGradientDescent):
-    def __init__(self, learning_rate, loss, epochs, batch_size, beta=0.9):
-        super().__init__(learning_rate, loss, epochs, batch_size)
+    def __init__(self, loss, epochs, batch_size=64, learning_rate=0.009, beta=0.9):
+        super().__init__(loss, epochs, batch_size, learning_rate)
         self.beta = beta
 
     def optimize(self, X, Y, parameters, config, is_printable_cost):

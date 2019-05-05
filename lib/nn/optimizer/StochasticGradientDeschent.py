@@ -15,8 +15,8 @@ from nn.CostEvaluator import CostEvaluator
 # def stochastic_run(X, Y, parameters,)
 
 class StochasticGradientDescent(GradientDescent):
-    def __init__(self, learning_rate, loss, epochs, batch_size):
-        super().__init__(learning_rate, loss, epochs)
+    def __init__(self, loss, epochs, batch_size=64, learning_rate=0.009):
+        super().__init__(loss, epochs, learning_rate)
         self.batch_size = batch_size
     
     def optimize(self, X, Y, parameters, config, is_printable_cost, update_dict=update_dict):
