@@ -11,7 +11,22 @@ from .StochasticGradientDeschent import StochasticGradientDescent
 
 from . import commons as c
 
+def vel_weight_f(beta):
+    def calculate(VdW, dW):
+        return beta * VdW + (1 - beta) * dW
+    
+    return calculate
+
+def vel_bias_f(beta):
+    def calculate(Vdb, db):
+        return beta * Vdb + (1 - beta) * db
+
+    return calculate
+ 
 def std_update(beta):
+    vel_weight = vel_weight_f(beta)
+    vel_bias = vel_bias_f(beta)
+
     def moment_update(learning_rate, m):
         """ momentum standard update
         """
@@ -34,8 +49,8 @@ def std_update(beta):
             dW = weight_grad(dZ, A_prev)
             db = bias_grad(dZ)
 
-            VdW = beta * VdW + (1 - beta) * dW
-            Vdb = beta * Vdb + (1 - beta) * db
+            VdW = vel_weight(VdW, dW)
+            Vdb = vel_bias(Vdb, db)
 
             W -= learning_rate * VdW
             b -= learning_rate * Vdb

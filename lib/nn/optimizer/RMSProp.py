@@ -1,45 +1,29 @@
 import torch as pt
 
-from backend import loss as l
-from backend import activation as a
-from backend import cost as c
-from backend import gradient as g
-# from backend import propagation as p
-# from backend import prediction as pred
-
 from nn.CostEvaluator import CostEvaluator
 from nn import propagation as p
 from .StochasticGradientDeschent import StochasticGradientDescent
 
 from . import commons as c
 
-# def init_rms(parameters):
-#     rms = {}
-
-#     for param, value in parameters.items():
-#         rms["Sd"+param] = pt.zeros(value.shape, dtype=pt.double, device=value.device)
-
-#     return rms
-
-# def update_rms(grads, rms, B):
-#     for grad_k, grad_v in grads.items():
-#         vel = "S" + grad_k
-#         rms[vel] = B * rms[vel] + (1 - B) * (grad_v ** 2)
-
-#     return rms
-
-# def update_parameters(L, parameters, grads, rms, learning_rate, epsilon):
-#     for l in range(1, L):
-#         l_s = str(l)
-
-#         parameters["W"+l_s] -= ( learning_rate *  grads["dW"+l_s] / (rms["SdW"+l_s] + epsilon).sqrt() )
-#         parameters["b"+l_s] -= ( learning_rate * grads["db"+l_s] / (rms["Sdb"+l_s] + epsilon).sqrt() ) 
+def prop_weight_f(beta2, epsion):
+    def calculate(SdW, dW):
+        return beta2 * SdW + (1 - beta2) * (dW ** 2)
     
-#     return parameters
+    return calculate
+
+def prop_bias_f(beta2, epsilon):
+    def calculate(Sdb, db):
+        return beta2 * Sdb + (1 - beta2) * (db ** 2)
+    
+    return calculate
 
 def std_update(beta2, epsilon):
-    def moment_update(learning_rate, m):
-        """ momentum standard update
+    prop_weight = prop_bias_f(beta2, epsilon)
+    prop_bias = prop_bias_f(beta2, epsilon)
+
+    def rms_update(learning_rate, m):
+        """ rms standard update
         """
         weight_grad = c.weight_std_grad(m)
         bias_grad = c.bias_std_grad(m)
@@ -48,7 +32,7 @@ def std_update(beta2, epsilon):
         Sdb = 0
 
         def update(dZ, cache, parameters):
-            """Momentum standard update
+            """Rms Prop standard update
                 cache - tuple cache: ((A_prev, W, b), ((next_cache, ...)))
                 parameters - tuple updated parameters: ((W, b), ((prev_params, ...)))
             """
@@ -60,8 +44,8 @@ def std_update(beta2, epsilon):
             dW = weight_grad(dZ, A_prev)
             db = bias_grad(dZ)
 
-            SdW = beta2 * SdW + (1 - beta2) * (dW ** 2)
-            Sdb = beta2 * Sdb + (1 - beta2) * (db ** 2)
+            SdW = prop_weight(SdW, dW)
+            Sdb = prop_bias(Sdb, db)
 
             W -= learning_rate * ( dW / (SdW + epsilon).sqrt() )
             b -= learning_rate * ( db / (Sdb + epsilon).sqrt() )
@@ -70,7 +54,7 @@ def std_update(beta2, epsilon):
 
         return update
 
-    return moment_update
+    return rms_update
 
 class RMSProp(StochasticGradientDescent):
     def __init__(self, learning_rate, loss, epochs, batch_size, beta2=0.9, epsilon=10e-8):

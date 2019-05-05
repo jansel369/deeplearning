@@ -1,96 +1,69 @@
 import torch as pt
 
-from backend import loss as l
-from backend import activation as a
-from backend import cost as c
-from backend import gradient as g
-from backend import propagation as p
-from backend import prediction as pred
-from backend import parameters as params
 
-from .Momentum import init_velocity, update_velocity
-from .RMSProp import init_rms, update_rms
+from nn.CostEvaluator import CostEvaluator
+from nn import propagation as p
+from .StochasticGradientDeschent import StochasticGradientDescent
 
-def velocity_corrected(velocity, beta1):
-    corrected = {}
-    
-    for key, value in velocity.items():
-        corrected[key] = value / (1 - beta1)
-    
-    return corrected
+from . import commons as c
+from .Momentum import vel_bias_f, vel_weight_f
+from .RMSProp import prop_bias_f, prop_weight_f
 
-def rms_corrected(rms, beta2):
-    corrected = {}
-    
-    for key, value in rms.items():
-        corrected[key] = value / (1 - beta2)
-    
-    return corrected
+def std_update(beta1, beta2, epsilon):
+    vel_weight = vel_weight_f(beta1)
+    vel_bias = vel_bias_f(beta1)
+    prop_weight = prop_bias_f(beta2, epsilon)
+    prop_bias = prop_bias_f(beta2, epsilon)
 
-def update_parameters(L, parameters, vel_c, rms_c, learning_rate, epsilon):
-    for l in range(1, L):
-        l_s = str(l)
+    def adam_update(learning_rate, m):
+        """ adam standard update
+        """
+        weight_grad = c.weight_std_grad(m)
+        bias_grad = c.bias_std_grad(m)
+        
+        VdW = 0
+        Vdb = 0
+        SdW = 0
+        Sdb = 0
 
-        parameters["W"+l_s] -= ( learning_rate * vel_c["VdW"+l_s] / (rms_c["SdW"+l_s] + epsilon).sqrt() )
-        parameters["b"+l_s] -= ( learning_rate * vel_c["Vdb"+l_s] / (rms_c["Sdb"+l_s] + epsilon).sqrt() )
-    
-    return parameters
+        def update(dZ, cache, parameters):
+            """Adam standard update
+                cache - tuple cache: ((A_prev, W, b), ((next_cache, ...)))
+                parameters - tuple updated parameters: ((W, b), ((prev_params, ...)))
+            """
+            nonlocal SdW, Sdb, VdW, Vdb
 
-class Adam:
-    def __init__(self, learning_rate, iterations, batch_size, loss, beta1=0.9, beta2=0.999, epsilon=10e-8):
-        self.learning_rate = learning_rate
-        self.epochs = iterations
-        self.batch_size = batch_size
-        self.loss = loss
+            current_cache, next_cache = cache
+            A_prev, W, b = current_cache
+
+            dW = weight_grad(dZ, A_prev)
+            db = bias_grad(dZ)
+
+            SdW = prop_weight(SdW, dW)
+            Sdb = prop_bias(Sdb, db)
+
+            SdW = beta2 * SdW + (1 - beta2) * (dW ** 2)
+            Sdb = beta2 * Sdb + (1 - beta2) * (db ** 2)
+
+            W -= learning_rate * ( dW / (SdW + epsilon).sqrt() )
+            b -= learning_rate * ( db / (Sdb + epsilon).sqrt() )
+
+            return dZ, cache, ((W, b), parameters)
+
+        return update
+
+    return adam_update
+
+class Adam(StochasticGradientDescent):
+    def __init__(self, learning_rate, loss, epochs, batch_size, beta1=0.9, beta2=0.9, epsilon=10e-8):
+        super().__init__(learning_rate, loss, epochs, batch_size)
         self.beta1 = beta1
         self.beta2 = beta2
         self.epsilon = epsilon
 
     def optimize(self, X, Y, parameters, config, is_printable_cost):
-        costs = []
-        layers = config['layers']
-        L = len(layers)
-        m = Y.shape[1]
+        update_dict = {
+            "std_update": std_update(self.beta1, self.beta2, self.epsilon)
+        }
 
-        compute_cost = c.costs_dict[self.loss]
-        loss_backward = g.loss_backward_dict[self.loss]
-
-        batch_iterations = int(m / self.batch_size)
-        count = 0
-
-        velocity = init_velocity(parameters)
-        rms = init_rms(parameters)
-
-        for i in range(self.epochs):
-
-            for t in range(batch_iterations):
-                batch_start = t * self.batch_size
-                batch_end = batch_start + self.batch_size
-
-                X_t = X[:, batch_start:batch_end]
-                Y_t = Y[:, batch_start:batch_end]
-
-                AL, caches = p.forward_propagation(X_t, parameters, layers)
-
-                count += 1
-                has_cost = count % 100 == 0
-                if has_cost:
-                    cost = compute_cost(AL, Y_t)
-                    costs.append(cost)
-
-                    if is_printable_cost:
-                        print("Cost after epoch %i, batch %i, : %f " %(i+1, t+1, cost))
-
-                dZL = loss_backward(AL, Y_t)
-
-                grads = p.backward_propagation(dZL, caches, layers)
-                
-                velocity = update_velocity(grads, velocity, self.beta1)
-                rms = update_rms(grads, rms, self.beta2)
-
-                vel_c = velocity_corrected(velocity, self.beta1)
-                rms_c = rms_corrected(rms, self.beta2)
-
-                parameters = update_parameters(L, parameters, vel_c, rms_c, self.learning_rate, self.epsilon)
-        
-        return parameters, costs
+        return super().optimize(X, Y, parameters, config, is_printable_cost, update_dict)

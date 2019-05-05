@@ -34,20 +34,6 @@ def gd_std_update(learning_rate, m):
 
     return update
 
-""" activatoin grad
-"""
-
-# def activation_grad(dZ, cache, parameters):
-#     current_cache, next_cache = cache
-#     A_prev, W, b = current_cache
-
-#     dA = W.t().mm(dZ)
-
-#     return dA, cache, parameters
-
-""" Optimizer
-"""
-
 update_dict = {
     'std_update': gd_std_update,
 }
