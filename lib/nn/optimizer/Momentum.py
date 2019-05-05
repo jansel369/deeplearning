@@ -11,35 +11,6 @@ from .StochasticGradientDeschent import StochasticGradientDescent
 
 from . import commons as c
 
-# from backend import propagation as p
-# from backend import prediction as pred
-
-# def init_velocity(parameters):
-#     velocity = {}
-
-#     for param, value in parameters.items():
-#         velocity["Vd"+param] = pt.zeros(value.shape, dtype=pt.double, device=value.device)
-
-#     return velocity
-
-# def update_velocity(grads, velocity, B):
-#     for grad_k, grad_v in grads.items():
-#         vel = "V" + grad_k
-#         velocity[vel] = B * velocity[vel] + (1 - B) * grad_v
-
-#     return velocity
-
-# def update_parameters(L, parameters, velocity, learning_rate):
-#     for l in range(1, L):
-
-#         W_l = "W" + str(l)
-#         b_l = "b" + str(l)
-
-#         parameters[W_l] = parameters[W_l] - learning_rate * velocity["VdW" + str(l)]
-#         parameters[b_l] = parameters[b_l] - learning_rate * velocity["Vdb" + str(l)]
-    
-#     return parameters
-
 def std_update(beta):
     def moment_update(learning_rate, m):
         """ momentum standard update
