@@ -22,7 +22,7 @@ def std_update(beta2, epsilon):
     prop_weight = prop_bias_f(beta2, epsilon)
     prop_bias = prop_bias_f(beta2, epsilon)
 
-    def rms_update(learning_rate, m):
+    def rms_update_f(learning_rate, m):
         """ rms standard update
         """
         weight_grad = c.weight_std_grad(m)
@@ -31,7 +31,7 @@ def std_update(beta2, epsilon):
         SdW = 0
         Sdb = 0
 
-        def update(dZ, cache, parameters):
+        def rms_update(dZ, cache, parameters):
             """Rms Prop standard update
                 cache - tuple cache: ((A_prev, W, b), ((next_cache, ...)))
                 parameters - tuple updated parameters: ((W, b), ((prev_params, ...)))
@@ -52,9 +52,9 @@ def std_update(beta2, epsilon):
 
             return dZ, cache, ((W, b), parameters)
 
-        return update
+        return rms_update
 
-    return rms_update
+    return rms_update_f
 
 class RMSProp(StochasticGradientDescent):
     def __init__(self, loss, epochs, batch_size=64, learning_rate=0.001, beta2=0.9, epsilon=10e-8):

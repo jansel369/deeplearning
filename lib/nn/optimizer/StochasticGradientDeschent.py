@@ -8,7 +8,7 @@ from nn import propagation as p
 from .GradientDescent import GradientDescent
 
 from . import commons as c
-from .GradientDescent import update_dict
+from .GradientDescent import gd_update_dict
 
 from nn.CostEvaluator import CostEvaluator
 
@@ -19,7 +19,7 @@ class StochasticGradientDescent(GradientDescent):
         super().__init__(loss, epochs, learning_rate)
         self.batch_size = batch_size
     
-    def optimize(self, X, Y, parameters, config, is_printable_cost, update_dict=update_dict):
+    def optimize(self, X, Y, parameters, config, is_printable_cost, update_dict=gd_update_dict):
         layers = config.layers
         m = Y.shape[1]
         batch_count = int(m / self.batch_size)

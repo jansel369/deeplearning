@@ -27,7 +27,7 @@ def std_update(beta):
     vel_weight = vel_weight_f(beta)
     vel_bias = vel_bias_f(beta)
 
-    def moment_update(learning_rate, m):
+    def moment_update_f(learning_rate, m):
         """ momentum standard update
         """
         weight_grad = c.weight_std_grad(m)
@@ -36,7 +36,7 @@ def std_update(beta):
         VdW = 0
         Vdb = 0
 
-        def update(dZ, cache, parameters):
+        def momentum_update(dZ, cache, parameters):
             """Momentum standard update
                 cache - tuple cache: ((A_prev, W, b), ((next_cache, ...)))
                 parameters - tuple updated parameters: ((W, b), ((prev_params, ...)))
@@ -57,9 +57,9 @@ def std_update(beta):
 
             return dZ, cache, ((W, b), parameters)
 
-        return update
+        return momentum_update
 
-    return moment_update
+    return moment_update_f
 
 class Momentum(StochasticGradientDescent):
     def __init__(self, loss, epochs, batch_size=64, learning_rate=0.009, beta=0.9):

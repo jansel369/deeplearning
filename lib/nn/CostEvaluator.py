@@ -33,7 +33,7 @@ class CostEvaluator:
         self.costs.append(cost)
 
         if self.print_cost:
-            print("Cost after iteration %i, batch %i: %f " % (iteration, batch, cost))
+            print("Cost after iteration %i, batch %i: %f " % (iteration+1, batch+1, cost))
 
     def plot_cost(self):
         plt.plot(self.costs)

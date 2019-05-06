@@ -1,6 +1,5 @@
 import torch as pt
 
-
 from nn.CostEvaluator import CostEvaluator
 from nn import propagation as p
 from .StochasticGradientDeschent import StochasticGradientDescent
@@ -25,7 +24,7 @@ def std_update(beta1, beta2, epsilon):
         Vdb = 0
         SdW = 0
         Sdb = 0
-        t = 1 # iteration
+        t = 1 # iteration, should start at 1 to avoid deviding by 0
 
         def update(dZ, cache, parameters):
             """Adam standard update
@@ -43,16 +42,16 @@ def std_update(beta1, beta2, epsilon):
             VdW = vel_weight(VdW, dW)
             Vdb = vel_bias(Vdb, db)
 
-            vcn = 1 - (beta1 ** t)
-            VdW_c = VdW / vcn # _c: corrected
-            Vdb_c = Vdb / vcn
+            vcd = 1 - (beta1 ** t)
+            VdW_c = VdW / vcd # _c: corrected
+            Vdb_c = Vdb / vcd
 
             SdW = prop_weight(SdW, dW)
             Sdb = prop_bias(Sdb, db)
 
-            scn = 1 - (beta2 ** t)
-            SdW_c = SdW / scn
-            Sdb_c = Sdb / scn
+            scd = 1 - (beta2 ** t)
+            SdW_c = SdW / scd
+            Sdb_c = Sdb / scd
 
             W -= learning_rate * ( VdW_c / (SdW_c + epsilon).sqrt() )
             b -= learning_rate * ( Vdb_c / (Sdb_c + epsilon).sqrt() )

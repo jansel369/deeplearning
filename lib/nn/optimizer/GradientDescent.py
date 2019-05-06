@@ -16,7 +16,7 @@ def gd_std_update(learning_rate, m):
     weight_grad = c.weight_std_grad(m)
     bias_grad = c.bias_std_grad(m)
 
-    def update(dZ, cache, parameters):
+    def gd_std_update(dZ, cache, parameters):
         """Gradient Descent standard update
             cache - tuple cache: ((A_prev, W, b), ((next_cache, ...)))
             parameters - tuple updated parameters: ((W, b), ((prev_params, ...)))
@@ -32,9 +32,9 @@ def gd_std_update(learning_rate, m):
 
         return dZ, cache, ((W, b), parameters)
 
-    return update
+    return gd_std_update
 
-update_dict = {
+gd_update_dict = {
     'std_update': gd_std_update,
 }
 
@@ -45,7 +45,7 @@ class GradientDescent:
         self.iterations = iterations
         self.loss = loss
 
-    def optimize(self, X, Y, parameters, config, is_printable_cost, update_dict=update_dict):
+    def optimize(self, X, Y, parameters, config, is_printable_cost, update_dict=gd_update_dict):
         layers = config.layers
         L = len(layers)
         m = Y.shape[1]
