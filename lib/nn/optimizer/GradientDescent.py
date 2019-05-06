@@ -9,7 +9,7 @@ from nn.CostEvaluator import CostEvaluator
 from nn import propagation as p
 from . import commons as c
 
-def gd_std_update(learning_rate, m):
+def gd_std_update_f(learning_rate, m):
     """ gradient descent standard update
     """
 
@@ -34,8 +34,12 @@ def gd_std_update(learning_rate, m):
 
     return gd_std_update
 
+def gd_batch_norm_update_f(learning_rate, m):
+    """ batch norm
+    """
+
 gd_update_dict = {
-    'std_update': gd_std_update,
+    'std_update': gd_std_update_f,
 }
 
 class GradientDescent:

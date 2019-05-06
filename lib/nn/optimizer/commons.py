@@ -22,6 +22,23 @@ def bias_std_grad(m):
     return f
 
 
+def batch_norm_grad(learning_rate, m):
+    """ to calculate batch norm gradients, dZ, dgamma, dbeta
+    """
+    def gd_bn_update(dZ_tilda, cache, parameters):
+        current_cache, next_cache = cache
+        gamma, beta, mu, mu_dev, var, gamma_i, Z_norm, epsilon = current_cache
+
+        dgamma = (dZ_tilda * Z_norm).sum(1, True)
+        dbeta = dZ_tilda.sum(1, True)
+
+        dZ_norm = dZ_tilda * gamma
+        dvar =  ( dZ_norm * mu_dev * (-0.5) * (gamma_i ** (-3)) ).sum(1, True)
+        dmu =  (-dZ_norm / gamma_i).sum(1, True) + dvar * (-2 / m) * mu_dev.sum(1, True)
+        dZ = dZ_norm / gamma_i + dvar * (2 / m) * mu_dev + dmu / m
+
+        return (dZ, dgamma, dbeta, gamma, beta), next_cache, parameters
+
 def liniar_std_grad(activation_backward):
     """ to calculate standard liniar gradient
     """

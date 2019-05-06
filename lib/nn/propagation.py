@@ -15,9 +15,29 @@ def liniar_forward(A_prev, params, has_cache, cache):
 
     return Z, next_params, cache
 
-def batch_norm_forward(Z, params, has_cache, cache):
 
-    return Z
+""" batch norm
+    https://arxiv.org/abs/1502.03167v1
+    https://deepnotes.io/batchnorm
+"""
+
+def batch_norm_forward(Z, params, has_cache, cache):
+    epsilon=1.001e-5
+    current_params, next_params = params
+    gamma, beta = current_params
+    m = Z.shape[1]
+    to_avg = 1 / m
+
+    mu = to_avg * Z.sum(1, True) # mean
+    mu_dev = Z - mu # deviation from mean
+    var = to_avg * (mu_dev ** 2).sum(1, True) # variance
+    gamma_i = (var + epsilon).sqrt() # gamma identity
+    Z_norm = mu_dev / gamma_i # Z normalized
+    Z_tilda = gamma * Z_norm + beta # batch normalized
+
+    cache = ((gamma, beta, mu, mu_dev, var, gamma_i, Z_norm, epsilon), cache) if has_cache else None
+
+    return Z_tilda, next_params, cache
 
 """ Activation forward
 """
@@ -37,26 +57,6 @@ def sigmoid_forward(Z, params, has_cache, cache):
     sigmoid = 1 / (1 + pt.exp(-Z))
 
     return sigmoid, params, cache
-
-""" activation backward
-"""
-
-def relu_backward(A):
-    g = (A > 0).double()
-
-    return g
-
-# def softmax_forward(Z, ndim=0):
-#     # e = Z.exp()
-#     # stable version
-#     e = pt.exp(Z - Z.max(ndim)[0])
-
-#     return e / e.sum(ndim)
-
-def sigmoid_backward(A):
-    # g'(z)
-    g = A * (1 - A)
-    return g
 
 """ gradients
 """
