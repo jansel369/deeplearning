@@ -37,9 +37,28 @@ def gd_std_update_f(learning_rate, m):
 def gd_batch_norm_update_f(learning_rate, m):
     """ batch norm
     """
+    weight_grad = c.weight_std_grad(m)
+
+    def gd_bn_update(cache1, cache2, parameters):
+        dZ, dgamma, dbeta, gamma, beta = cache1
+        current_cache, next_cache = cache2
+        A_prev, W, b = current_cache
+
+        dW = weight_grad(dZ, A_prev)
+
+        W -= learning_rate * dW
+        gamma -= learning_rate * dgamma
+        beta -= learning_rate * dbeta
+
+        parameters = ((W, b), ((gamma, beta), parameters))
+
+        return dZ, cache2, parameters
+
+    return gd_bn_update
 
 gd_update_dict = {
     'std_update': gd_std_update_f,
+    'bn_update': gd_batch_norm_update_f,
 }
 
 class GradientDescent:
