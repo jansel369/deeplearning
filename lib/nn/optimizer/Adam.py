@@ -138,7 +138,6 @@ def adam_batch_norm_update_f(beta1, beta2, epsilon):
 
     return adam_bn_update
 
-
 class Adam(StochasticGradientDescent):
     def __init__(self, loss, epochs, batch_size=64, learning_rate=3e-4, beta1=0.9, beta2=0.999, epsilon=10e-8):
         super().__init__(loss, epochs, batch_size, learning_rate)

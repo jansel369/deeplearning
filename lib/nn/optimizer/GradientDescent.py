@@ -1,6 +1,6 @@
 from backend import loss as l
 from backend import activation as a
-from backend import cost as c
+from backend import cost
 from backend import gradient as g
 # from backend import propagation as p
 # from backend import prediction as pred
@@ -8,109 +8,44 @@ from . import commons
 from nn.CostEvaluator import CostEvaluator
 from nn import propagation as p
 from . import commons as c
+from collections import namedtuple
 
-def gd_std_update_f(learning_rate, m):
-    """ gradient descent standard update
-    """
+GradientDescent = namedtuple('GradientDescent', 'loss, iterations, learning_rate, optimize')
 
-    weight_grad = c.weight_std_grad(m)
-    bias_grad = c.bias_std_grad(m)
+def update_param_f(hyp_params):
+    learning_rate = hyp_params.learning_rate
 
-    def gd_std_update(dZ, cache, parameters):
-        """Gradient Descent standard update
-            cache - tuple cache: ((A_prev, W, b), ((next_cache, ...)))
-            parameters - tuple updated parameters: ((W, b), ((prev_params, ...)))
-        """
+    def update_param(dZ, param_grad, cache, parameters):
         current_cache, next_cache = cache
-        A_prev, W, b = current_cache
+        A_prev, current_param = current_cache
+        
+        for i in range(len(param_grad)):
+            current_param[i] -= learning_rate * param_grad[i]
 
-        dW = weight_grad(dZ, A_prev)
-        db = bias_grad(dZ)
+        return dZ, None, (current_param, parameters)
+    
+    return update_param
 
-        W -= learning_rate * dW
-        b -= learning_rate * db
+def gradient_optimization(X, Y, parameters, hyper_params, forward_prop, back_prop, print_cost=False):
+    costs = []
+    m = Y.shape[1]
+    iterations = hyper_params.iterations
+    compute_cost = cost.costs_dict[hyper_params.loss]
 
-        return dZ, cache, ((W, b), parameters)
+    for i in range(iterations):
+        AL, cache = forward_prop(X, parameters)
+        parameters = back_prop(AL, Y, cache)
 
-    return gd_std_update
+        if i % 100 == 0:
+            cost_i = compute_cost(AL, Y)
+            costs.append(cost_i)
+            if print_cost:
+                print("Cost after iteration %i: %f " % (i + 1, cost_i))
 
-def gd_batch_norm_update_f(learning_rate, m):
-    """ batch norm
-    """
-    weight_grad = c.weight_std_grad(m)
+    return parameters
 
-    def gd_bn_update(cache1, cache2, parameters):
-        dZ, dgamma, dbeta, gamma, beta = cache1
-        current_cache, next_cache = cache2
-        A_prev, W, b = current_cache
+def gradient_descent(loss, iterations, learning_rate=0.01):
+    optimizer = GradientDescent(loss, iterations, learning_rate, gradient_optimization)
 
-        dW = weight_grad(dZ, A_prev)
+    return optimizer
 
-        W -= learning_rate * dW
-        gamma -= learning_rate * dgamma
-        beta -= learning_rate * dbeta
-
-        parameters = ((W, b), ((gamma, beta), parameters))
-
-        return dZ, cache2, parameters
-
-    return gd_bn_update
-
-gd_update_dict = {
-    'std_update': gd_std_update_f,
-    'bn_update': gd_batch_norm_update_f,
-}
-
-class GradientDescent:
-
-    def __init__(self, loss, iterations, learning_rate=0.01):
-        self.learning_rate = learning_rate
-        self.iterations = iterations
-        self.loss = loss
-
-    def optimize(self, X, Y, parameters, config, is_printable_cost, update_dict=gd_update_dict):
-        layers = config.layers
-        L = len(layers)
-        m = Y.shape[1]
-
-        cost_evaluator = CostEvaluator(self.loss, self.learning_rate, print_cost=True)
-
-        forwards = config.forwards
-        backwards = c.construct_backwards(update_dict, layers, self.learning_rate, m)
-
-        forward_prop = p.forward_propagation(forwards, has_cache=True) # set has_cache=True for backprap training
-        backward_prop = c.backward_propagation(backwards, self.loss)
-
-        for i in range(self.iterations):
-
-            AL, cache = forward_prop(X, parameters)
-
-            parameters = backward_prop(AL, Y, cache)
-
-            cost_evaluator.batch_cost(i, AL, Y)
-
-        return parameters, cost_evaluator
-
-# def f_prop_cache_debugger(cache):
-#     # curr_c, next_c = cache
-#     counter = 1
-
-#     while cache != None:
-#         curr_c, next_c = cache
-#         A_p, W, b = curr_c
-#         print(counter, A_p.shape, W.shape, b.shape)
-#         counter += 1
-
-#         cache = next_c
-
-# def b_prop_params_debugger(cache):
-# # curr_c, next_c = cache
-#     counter = 1
-
-#     while cache != None:
-#         curr_c, next_c = cache
-#         W, b = curr_c
-#         print(counter,  W.shape, b.shape)
-#         counter += 1
-
-#         cache = next_c

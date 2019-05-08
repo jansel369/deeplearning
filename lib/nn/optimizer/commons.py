@@ -9,35 +9,43 @@ from backend import gradient as g
 """ parameters update
 """
 
-def weight_std_grad(m):
-    def f(dZ, A_prev):
-        return (1 / m) * dZ.mm(A_prev.t())
+# def weight_std_grad(m):
+#     to_avg = 1 / m
     
-    return f
+#     def f(dZ, A_prev):
+#         return to_avg * dZ.mm(A_prev.t())
+    
+#     return f
 
-def bias_std_grad(m):
-    def f(dZ):
-        return (1 / m) * dZ.sum(dim=1, keepdim=True)
+# def bias_std_grad(m):
+#     to_avg = 1 / m
+    
+#     def f(dZ):
+#         return to_avg * dZ.sum(dim=1, keepdim=True)
 
-    return f
+#     return f
 
 
-def batch_norm_grad(learning_rate, m):
-    """ to calculate batch norm gradients, dZ, dgamma, dbeta
-    """
-    def gd_bn_update(dZ_tilda, cache, parameters):
-        current_cache, next_cache = cache
-        gamma, beta, mu, mu_dev, var, gamma_i, Z_norm, epsilon = current_cache
+# def batch_norm_grad(learning_rate, m):
+#     """ to calculate batch norm gradients, dZ, dgamma, dbeta
+#     """
+#     to_avg = 1 / m
 
-        dgamma = (dZ_tilda * Z_norm).sum(1, True)
-        dbeta = dZ_tilda.sum(1, True)
+#     def bn_grad_backward(dZ_tilda, cache, parameters):
+#         current_cache, next_cache = cache
+#         gamma, beta, mu, mu_dev, var, gamma_i, Z_norm, epsilon = current_cache
 
-        dZ_norm = dZ_tilda * gamma
-        dvar =  ( dZ_norm * mu_dev * (-0.5) * (gamma_i ** (-3)) ).sum(1, True)
-        dmu =  (-dZ_norm / gamma_i).sum(1, True) + dvar * (-2 / m) * mu_dev.sum(1, True)
-        dZ = dZ_norm / gamma_i + dvar * (2 / m) * mu_dev + dmu / m
+#         dgamma = to_avg * (dZ_tilda * Z_norm).sum(1, True)
+#         dbeta = to_avg * dZ_tilda.sum(1, True)
 
-        return (dZ, dgamma, dbeta, gamma, beta), next_cache, parameters
+#         dZ_norm = dZ_tilda * gamma
+#         dvar =  ( dZ_norm * mu_dev * (-0.5) * (gamma_i ** 3) ).sum(1, True)
+#         dmu =  (-dZ_norm * gamma_i).sum(1, True) + dvar * (-2 / m) * mu_dev.sum(1, True)
+#         dZ = dZ_norm * gamma_i + (2 / m) * dvar * mu_dev + to_avg * dmu
+        
+#         return (dZ, dgamma, dbeta, gamma, beta), next_cache, parameters
+
+#     return bn_grad_backward
 
 def liniar_std_grad(activation_backward):
     """ to calculate standard liniar gradient
@@ -52,46 +60,46 @@ def liniar_std_grad(activation_backward):
 
     return compute_liniar_std_grad
 
+def param_grad(learning_rate, m):
+    weight_grad = weight_std_grad(m)
+    bias_grad = bias_std_grad(m)
+    def param_grad_backward(dZ, cache, parameters):
+        
 
-def construct_backwards(update_dict, layers, learnibng_rate, m):
-    """ temporary constructor
-        todo: batch norm
-        backwards - array of backward functions
-                  - 2 hidden, 1 output layers
-                    - format: [update, liniar_grad, update, liniar_grad, update]
-    """
+        dW = weight_grad(dZ, )
 
-    backwards = []
-    # add first update backward
-    backwards.append(update_dict['std_update'](learnibng_rate, m))
+    return param_grad_backward
+    
 
-    for l in reversed(range(1, len(layers) - 1)):
-        layer = layers[l]
-        activation = layer.activation
+# def construct_backwards(update_dict, layers, learnibng_rate, m):
+#     """ helper functions that returns array of backward propagation functions
+#         backwards - array of backward functions
+#                   - 2 hidden, 1 output layers
+#                     - format: [update, liniar_grad, (batch_norm_grad,) std/bn: update, liniar_grad, update]
+#     """
 
-        # add next grad calculation
-        backwards.append(liniar_std_grad(a.activation_backward_dict[activation]))
+#     backwards = []
+#     # add first update backward
+#     backwards.append(update_dict['std_update'](learnibng_rate, m))
 
-        # Add parameter update function
-        backwards.append(update_dict['std_update'](learnibng_rate, m))
+#     for l in reversed(range(1, len(layers) - 1)):
+#         layer = layers[l]
+#         activation = layer.activation
+#         update_fn_name = 'std_update'
 
-    return backwards
+#         # add next grad calculation
+#         # calculates the liniear gradients dZ
+#         backwards.append(liniar_std_grad(a.activation_backward_dict[activation]))
+
+#         if layer.batch_norm: # to calculates batch norm gradients
+#             update_fn_name = 'bn_update'
+#             backwards.append(batch_norm_grad(learnibng_rate, m))
+
+#         # Add parameter update function for batch norm or standard parameters
+#         backwards.append(update_dict[update_fn_name](learnibng_rate, m))
+
+#     return backwards
 
 
 """ Backward propagation
 """
-def backward_propagation(backwards, loss):
-    grad_loss = g.loss_backward_dict[loss]
-    
-    def f(AL, Y, cache):
-        parameters = None
-
-        dZ = grad_loss(AL, Y)
-        for backward in backwards:
-            # print('running backward: ', backward.__name__)
-
-            dZ, cache, parameters = backward(dZ, cache, parameters)
-
-        return parameters
-
-    return f

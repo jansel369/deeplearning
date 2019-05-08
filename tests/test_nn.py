@@ -39,8 +39,8 @@ print("\n------> Test softmax nn: MNIST")
         
 X_train, Y_train, X_test, Y_test, X_validation, Y_validation = mnist_data()
 
-X_train = X_train#[:, 0:10000]
-Y_train = Y_train#[:, 0:10000]
+X_train = X_train[:, 0:10000]
+Y_train = Y_train[:, 0:10000]
 
 learning_rate = 0.001
 # batch_size = 100
@@ -48,7 +48,7 @@ learning_rate = 0.001
 training_iteration = 7000
 n = X_train.shape[0]
 loss = nn.loss.categorical_crossentropy
-# gd = nn.optimizer.GradientDescent(learning_rate, training_iteration, loss)
+gd = nn.optimizer.GradientDescent(loss, 5000)
 
 epochs = 20
 batch_size = 64
@@ -61,7 +61,7 @@ momentum = nn.optimizer.Momentum(loss, epochs)
 rms = nn.optimizer.RMSProp(loss, 16)
 
 epochs = 5
-adam = nn.optimizer.Adam(loss, epochs)
+adam = nn.optimizer.Adam(loss, 5)
 
 relu = nna.relu()
 
@@ -69,12 +69,13 @@ X = nna.input(n)
 X = nna.layer(50)(X)
 X = relu(X)
 X = nna.layer(20)(X)
+X = nna.batch_norm()(X)
 X = relu(X)
 X = nna.layer(10)(X)
 X = nna.softmax()(X)
 
 
-model = nn.Model(X, adam)
+model = nn.Model(X, rms)
 
 print("fitting model....")
 

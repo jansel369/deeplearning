@@ -63,6 +63,9 @@ def leaky_relu_backward(A):
 def tanh_backward(A):
     return 1 - A.sqrt()
 
+def softmax_backward(A):
+    return 0
+
 activations_dict = {
     sigmoid: sigmoid_forward,
     relu: relu_forward,
