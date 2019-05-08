@@ -86,9 +86,9 @@ def forward_propagation(forwards, has_cache=False):
     return forward_prop
 
 
-def update_param_a(count=2):
+def update_param_a():
     def construct_update(optimizer):
-        return optimizer.update(count)
+        return optimizer.update_f(optimizer)
 
     return construct_update
 
@@ -117,7 +117,7 @@ def liniar_grad_f(activation_backward):
         return liniar_grad
     return liniar_grad_f2
 
-""" Calculating gradient parameters 
+""" Calculating gradient parameters dW, db
 """
 
 def weight_grad(dZ, avg, A_prev):
@@ -126,62 +126,49 @@ def weight_grad(dZ, avg, A_prev):
 def bias_grad(dZ, avg):
     return avg * dZ.sum(dim=1, keepdim=True)
 
-def std_params_grad_f(m):
-    to_avg = 1 / m
-    def calculate_grad(dZ, A_prev):
-        dW = weight_grad(dZ, to_avg, A_prev)
-        db = bias_grad(dZ, to_avg)
+def std_params_grad_f(dZ, A_prev, to_avg):
+    dW = weight_grad(dZ, to_avg, A_prev)
+    db = bias_grad(dZ, to_avg)
 
-        return [dW, db]
+    return [dW, db]
     
-    return calculate_grad
 
-def bn_prams_grad_f(m):
-    to_avg = 1 / m
-    def calculate_grad(dZ, A_prev):
-        dW = weight_grad(dZ, to_avg, A_prev)
+def bn_prams_grad_f(dZ, A_prev, to_avg):
+    dW = weight_grad(dZ, to_avg, A_prev)
 
-        return [dW]
-    
-    return calculate_grad
+    return [dW]
 
-
-def param_grad_a(grad_calculator=std_params_grad_f):
-    def param_grad_i(optimizer, m=1):
-        calculate_grad = grad_calculator(m)
+def param_grad_a(grad_calculator=std_params_grad_f): # calculates dW, db or dW only
+    def param_grad_i(optimizer, to_avg):
         def calculate_param_grad(dZ, param_grad, cache, parameters):
             current_cache, next_cache = cache
             A_prev, current_param = current_cache
 
-            param_grad = grad_calculator(dZ, A_prev)
+            param_grad = grad_calculator(dZ, A_prev, to_avg)
 
             return dZ, param_grad, cache, parameters
         
         return calculate_param_grad
     return param_grad_i
 
-def batch_norm_grad_a():
-    def bn_grad_i(optimizer, m):
-        to_avg = 1 / m
-
+def batch_norm_grad_a(): # calculates dZ from batch norm backwarad
+    def bn_grad_i(optimizer, to_avg):
         def bn_grad_backward(dZ_tilda, param_grad, cache, parameters):
             current_cache, next_cache = cache
             gamma, beta, mu, mu_dev, var, gamma_i, Z_norm, epsilon = current_cache
 
             dZ_norm = dZ_tilda * gamma
             dvar =  ( dZ_norm * mu_dev * (-0.5) * (gamma_i ** 3) ).sum(1, True)
-            dmu =  (-dZ_norm * gamma_i).sum(1, True) + dvar * (-2 / m) * mu_dev.sum(1, True)
-            dZ = dZ_norm * gamma_i + (2 / m) * dvar * mu_dev + to_avg * dmu
+            dmu =  (-dZ_norm * gamma_i).sum(1, True) + dvar * (-2 * to_avg) * mu_dev.sum(1, True)
+            dZ = dZ_norm * gamma_i + (2 * to_avg) * dvar * mu_dev + to_avg * dmu
             
             return dZ, param_grad, next_cache, parameters
         
         return bn_grad_backward
     return bn_grad_i
 
-def bn_param_grad_a():
-    def param_grad(optimizer, m):
-        to_avg = 1 / m
-
+def bn_param_grad_a(): # calculates dgamma, dbeta
+    def param_grad(optimizer, to_avg):
         def bn_grad(dZ_tilda, param_grad, cache, parameters):
             current_cache, next_cache = cache
             gamma, beta, mu, mu_dev, var, gamma_i, Z_norm, epsilon = current_cache
@@ -194,6 +181,9 @@ def bn_param_grad_a():
         return bn_grad
     return param_grad
 
+
+""" Runs back prop
+"""
 def backward_propagation(backwards, loss):    
     def f(AL, Y, cache):
         parameters = None
@@ -206,3 +196,20 @@ def backward_propagation(backwards, loss):
         return parameters
 
     return f
+
+
+""" Constructing backwards
+"""
+def construct_backwards(backwards, optimizer, to_avg):
+    """ helper functions that returns array of backward propagation functions
+        backwards - array of backward functions
+                  - 2 hidden, 1 output layers
+                    - format: [update, liniar_grad, (batch_norm_grad,) std/bn: update, liniar_grad, update]
+    """
+
+    new_backwards = []
+
+    for i in range(1, len(backwards) - 1): #disinclude first and last backwards from list
+        new_backwards.append(backwards[i](optimizer, to_avg))
+
+    return backward_propagation(new_backwards, optimizer.loss)

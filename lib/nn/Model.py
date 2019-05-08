@@ -33,10 +33,13 @@ class Model():
         assert input_size == n, 'Invalid input size: ' + str(input_size) + ' : ' + str(n)
         assert output_size == o, 'Invalid output size: ' + str(output_size) + ' : ' + str(o)
 
+        forwards = self.config.forwards
+        backwards = self.config.backwards
+
         start_time = time.time() # trainig timer
 
         parameters = params.initialize_parameters(layers, device)
-        parameters, cost_evaluator = self.optimizer.optimize(X_train, Y_train, parameters, self.config, is_printable_cost)
+        parameters, cost_evaluator = self.optimizer.optimize(X_train, Y_train, parameters, self.optimizer, forwards, backwards, is_printable_cost)
         
         self.parameters = parameters
 
@@ -47,11 +50,12 @@ class Model():
 
 
     def evaluate(self, X, Y, name="evaluate"):
+        loss = self.optimizer.loss
 
         AL, _ = p.forward_propagation(self.config.forwards)(X, self.parameters)
 
-        accuracy = pred_acc.predict_accuracy_dict[self.optimizer.loss](AL, Y)
-        cost = c.costs_dict[self.optimizer.loss](AL, Y)
+        accuracy = loss.pred_acc(AL, Y)
+        cost = loss.compute_cost(AL, Y)
 
         print(name)
         print("-> accuracy: %f" % (accuracy))
