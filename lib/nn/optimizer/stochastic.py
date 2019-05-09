@@ -7,7 +7,7 @@ GradientDescent = namedtuple('GradientDescent', 'loss, epochs, batch_size, learn
 
 def stochastic_optimization(X, Y, parameters, optimizer, forwards, backwards, print_cost=False):
     costs = []
-    opochs = optimizer.opochs
+    opochs = optimizer.epochs
     batch_size = optimizer.batch_size
     to_avg = 1 / batch_size
     m = Y.shape[1]
@@ -37,7 +37,7 @@ def stochastic_optimization(X, Y, parameters, optimizer, forwards, backwards, pr
                 costs.append(cost)
 
                 if print_cost:
-                    print("Cost after iteration %i, batch %i: %f " % (i+1, t+1, cost))
+                    print("Cost after epoch %i, batch %i: %f " % (i+1, t+1, cost))
 
 
     return parameters

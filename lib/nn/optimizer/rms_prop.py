@@ -2,7 +2,7 @@ import torch as pt
 from collections import namedtuple
 from .stochastic import stochastic_optimization
 
-RMSProp = namedtuple('RMSProp', 'loss, iterations, batch_size, learning_rate, beta2, epsilon, optimize, param_update_f')
+RMSProp = namedtuple('RMSProp', 'loss, epochs, batch_size, learning_rate, beta2, epsilon, optimize, param_update_f')
 
 def rms_grad(grad, Sgrad, beta2):
     return beta2 * Sgrad + (1 - beta2) * (grad ** 2)

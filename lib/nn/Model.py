@@ -44,7 +44,7 @@ class Model():
         self.parameters = parameters
 
         end_time = time.time()
-        print("Training time: ", datetime.timedelta(seconds=end_time - start_time))
+        print("\nTraining time: ", datetime.timedelta(seconds=end_time - start_time), '\n')
 
         return parameters
 
