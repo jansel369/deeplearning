@@ -11,8 +11,3 @@ def categorical_crossentoropy_backward(AL, Y):
         summary of derivative dz = da/dz.dL/da with softmax
     """
     return AL - Y
-
-# loss_backward_dict = {
-#     l.categorical_crossentropy: categorical_crossentoropy_backward,
-#     l.binary_crossentropy: binary_crossentropy_backward,
-# }

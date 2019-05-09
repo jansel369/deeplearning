@@ -1,10 +1,6 @@
 import torch as pt
 from backend import activation as a
-from backend import initialization as init
-from backend import parameters
-# from .commons import *
 import copy
-# import optimizer
 from . import propagation
 
 from collections import namedtuple
@@ -80,7 +76,7 @@ def batch_norm():
 """ activations functions
 """
 
-def relu(init=init.he):
+def relu(init='he'):
     def f(config):
         config = update_layer_config(config, a.relu, init)
         config.forwards.append(propagation.activation_forward_a(a.relu.forward))
@@ -90,7 +86,7 @@ def relu(init=init.he):
 
     return f
 
-def sigmoid(init=init.glorot):
+def sigmoid(init='glorot'):
     def f(config):
         config = update_layer_config(config, a.sigmoid, init)
         config.forwards.append(propagation.activation_forward_a(a.sigmoid.forward))
@@ -99,7 +95,7 @@ def sigmoid(init=init.glorot):
         return config
     return f
 
-def softmax(init=init.glorot):
+def softmax(init='glorot'):
     def f(config):
         config = update_layer_config(config, a.softmax, init)
         config.forwards.append(propagation.activation_forward_a(a.softmax.forward))

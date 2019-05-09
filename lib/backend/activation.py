@@ -6,7 +6,6 @@ from collections import namedtuple
 
 import torch as pt
 
-
 leaky_value = 0.01 
 
 def sigmoid_forward(Z):

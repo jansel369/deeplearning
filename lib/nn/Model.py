@@ -1,21 +1,14 @@
 import copy
 import torch as pt
-from collections import namedtuple
 import time
 import datetime
 
 from .commons import *
 from .optimizer import *
-from backend import cost as c
-# from backend import prediction as pred
-
-from backend import accuracy as pred_acc
 
 from . import parameters as params
 from . import initialization as init
 from . import propagation as p
-
-# _Model = namedtuple('Model', 'fit, evaluate')
 
 class Model():
     def __init__(self, config, optimizer):
@@ -62,15 +55,4 @@ class Model():
         print("-> cost: %f" %(cost))
 
         return accuracy, cost
-    
-
-
-# class Model():
-#     def __init__(self, config, optimizer):
-#         self._config = copy.deepcopy(config)
-#         self.optimizer = optimizer
-
-    # def optimization(self, optimizer):
-    #     self.optimizer = optimizer
-
     
