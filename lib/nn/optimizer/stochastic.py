@@ -1,13 +1,13 @@
 
 from collections import namedtuple
 from nn.propagation import construct_backwards, forward_propagation
-from .gradient_descent import update_param_f
+from .gradient_descent import gd_update_param_f
 
-GradientDescent = namedtuple('GradientDescent', 'loss, iterations, batch_size, learning_rate, optimize, param_update_f')
+GradientDescent = namedtuple('GradientDescent', 'loss, epochs, batch_size, learning_rate, optimize, param_update_f')
 
 def stochastic_optimization(X, Y, parameters, optimizer, forwards, backwards, print_cost=False):
     costs = []
-    iterations = optimizer.iterations
+    opochs = optimizer.opochs
     batch_size = optimizer.batch_size
     to_avg = 1 / batch_size
     m = Y.shape[1]
@@ -22,7 +22,7 @@ def stochastic_optimization(X, Y, parameters, optimizer, forwards, backwards, pr
 
     total_iterations = 0
 
-    for i in range(iterations):
+    for i in range(opochs):
         for t in range(batch_count):
             total_iterations += 1
 
@@ -43,7 +43,7 @@ def stochastic_optimization(X, Y, parameters, optimizer, forwards, backwards, pr
     return parameters
 
 
-def stochastic(loss, iterations, batch_size=64, learning_rate=0.01):
-    optimizer = GradientDescent(loss, iterations, batch_size, learning_rate, stochastic_optimization, update_param_f)
+def stochastic(loss, opochs, batch_size=64, learning_rate=0.01):
+    optimizer = GradientDescent(loss, opochs, batch_size, learning_rate, stochastic_optimization, gd_update_param_f)
 
     return optimizer
