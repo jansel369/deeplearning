@@ -11,9 +11,10 @@ categorical_crossentropy = Loss(
     accuracy.categorical_crossentoropy_predict_accuracy,
     cost.categorical_crossentropy_cost,
 )
+
 binary_crossentropy = Loss(
     'binary_crossentropy',
     gradient.binary_crossentropy_backward,
     accuracy.binary_crossentropy_predict_accuracy,
-    cost.binary_crossentropy_cost,
+    cost.binary_crossentropy_cost, 
 )

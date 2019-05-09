@@ -43,33 +43,13 @@ def batch_norm_forward(Z, params, has_cache, cache):
 """ Activation forward
 """
 
-def relu_forward(Z, params, has_cache, cache):
-    Z[Z < 0] = 0.
+def activation_forward_a(activation):
+    def activation_forward(Z, params, has_cache, cache):
+        A = activation(Z)
 
-    return Z, params, cache
+        return A, params, cache
 
-def softmax_forward(Z, params, has_cache, cache):
-    e = pt.exp(Z - Z.max(0)[0])
-    relu = e / e.sum(0)
-
-    return relu, params, cache
-
-def sigmoid_forward(Z, params, has_cache, cache):
-    sigmoid = 1 / (1 + pt.exp(-Z))
-
-    return sigmoid, params, cache
-
-""" gradients
-"""
-
-def liniar_grad(activation_backward):
-    def f(dA, A):
-        return dA * activation_backward(A)
-
-    return f
-
-def activation_grad(W, dZ):
-    return W.t().mm(dZ)
+    return activation_forward
 
 """ Runs all forward propagations
 """
@@ -85,15 +65,30 @@ def forward_propagation(forwards, has_cache=False):
 
     return forward_prop
 
+"""
+     Back prop
+"""
+
+""" gradients
+"""
+
+def liniar_grad(activation_backward):
+    def f(dA, A):
+        return dA * activation_backward(A)
+
+    return f
+
+def activation_grad(W, dZ):
+    return W.t().mm(dZ)
 
 def update_param_a():
-    def construct_update(optimizer):
-        return optimizer.update_f(optimizer)
+    def construct_update(optimizer, to_avg):
+        return optimizer.param_update_f(optimizer, to_avg)
 
     return construct_update
 
 def activation_grad_a(): # called from architecture
-    def activation_grad_f2(optimizer): # called from back prop initialization
+    def activation_grad_f2(optimizer, to_avg): # called from back prop initialization
         def activation_grad(dZ, param_grad, cache, parameters): # called during backprop
             current_cache, next_cache = cache
             A_prev, current_param = current_cache
@@ -106,7 +101,7 @@ def activation_grad_a(): # called from architecture
     return activation_grad_f2
 
 def liniar_grad_f(activation_backward):
-    def liniar_grad_f2(optimizer):
+    def liniar_grad_f2(optimizer, to_avg):
         def liniar_grad(dA, param_grad, cache, parameters):
             current_cache, next_cache = cache
             A, preced_param = current_cache
@@ -187,11 +182,12 @@ def bn_param_grad_a(): # calculates dgamma, dbeta
 def backward_propagation(backwards, loss):    
     def f(AL, Y, cache):
         parameters = None
+        param_grad = None
 
         dZ = loss.grad_loss(AL, Y)
 
-        for backward in backwards:
-            dZ, cache, parameters = backward(dZ, cache, parameters)
+        for backward in reversed(backwards):
+            dZ, param_grad, cache, parameters = backward(dZ, param_grad, cache, parameters)
 
         return parameters
 

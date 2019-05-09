@@ -47,28 +47,28 @@ from backend import gradient as g
 
 #     return bn_grad_backward
 
-def liniar_std_grad(activation_backward):
-    """ to calculate standard liniar gradient
-    """
-    def compute_liniar_std_grad(dZ, cache, parameters):
-        current_cache, next_cache = cache
-        A, W_preced, b_preced = current_cache
+# def liniar_std_grad(activation_backward):
+#     """ to calculate standard liniar gradient
+#     """
+#     def compute_liniar_std_grad(dZ, cache, parameters):
+#         current_cache, next_cache = cache
+#         A, W_preced, b_preced = current_cache
         
-        dZ = W_preced.t().mm(dZ) * activation_backward(A)
+#         dZ = W_preced.t().mm(dZ) * activation_backward(A)
 
-        return dZ, next_cache, parameters
+#         return dZ, next_cache, parameters
 
-    return compute_liniar_std_grad
+#     return compute_liniar_std_grad
 
-def param_grad(learning_rate, m):
-    weight_grad = weight_std_grad(m)
-    bias_grad = bias_std_grad(m)
-    def param_grad_backward(dZ, cache, parameters):
+# def param_grad(learning_rate, m):
+#     weight_grad = weight_std_grad(m)
+#     bias_grad = bias_std_grad(m)
+#     def param_grad_backward(dZ, cache, parameters):
         
 
-        dW = weight_grad(dZ, )
+#         dW = weight_grad(dZ, )
 
-    return param_grad_backward
+#     return param_grad_backward
     
 
 # def construct_backwards(update_dict, layers, learnibng_rate, m):

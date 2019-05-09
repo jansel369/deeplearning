@@ -9,8 +9,9 @@ from .Model import Model
 # from core.loss.list import *
 # from backend import activation
 # from backend import
-from . import activation
+# from . import activation
 from backend import loss
 
 from . import optimizer
 from .optimizer import *
+from . import loss

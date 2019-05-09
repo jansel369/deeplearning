@@ -39,14 +39,14 @@ class Model():
         start_time = time.time() # trainig timer
 
         parameters = params.initialize_parameters(layers, device)
-        parameters, cost_evaluator = self.optimizer.optimize(X_train, Y_train, parameters, self.optimizer, forwards, backwards, is_printable_cost)
+        parameters = self.optimizer.optimize(X_train, Y_train, parameters, self.optimizer, forwards, backwards, is_printable_cost)
         
         self.parameters = parameters
 
         end_time = time.time()
         print("Training time: ", datetime.timedelta(seconds=end_time - start_time))
 
-        return parameters, cost_evaluator
+        return parameters
 
 
     def evaluate(self, X, Y, name="evaluate"):

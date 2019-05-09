@@ -37,25 +37,31 @@
 #     print(a, b, c)
 
 # b(a())
-def a():
-    d = {
-        'a': 0
-    }
-    v = 0
-    m = 0
-    def b():
-        # v = v + 1
+# def a():
+#     d = {
+#         'a': 0
+#     }
+#     v = 0
+#     m = 0
+#     def b():
+#         # v = v + 1
 
-        d['a'] += 1
-        nonlocal v, m
-        v += 1
-        m += 1
-        print(d)
-        print(v, m)
+#         d['a'] += 1
+#         nonlocal v, m
+#         v += 1
+#         m += 1
+#         print(d)
+#         print(v, m)
     
-    return b
+#     return b
 
-t = a()
+# t = a()
 
-t()
-t()
+# t()
+# t()
+
+
+a = [1, 2, 3, 4]
+
+for i in reversed(a):
+    print(i)

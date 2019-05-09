@@ -2,15 +2,10 @@
 reference: https://ml-cheatsheet.readthedocs.io/en/latest/activation_functions.html
 
 """
+from collections import namedtuple
 
 import torch as pt
 
-sigmoid = 'sigmoid'
-tanh = 'tanh'
-relu = 'relu'
-softmax = 'softmax'
-leaky_relu = 'leaky_relu'
-tanh = 'tanh'
 
 leaky_value = 0.01 
 
@@ -66,17 +61,11 @@ def tanh_backward(A):
 def softmax_backward(A):
     return 0
 
-activations_dict = {
-    sigmoid: sigmoid_forward,
-    relu: relu_forward,
-    softmax: softmax_forward,
-    leaky_relu: leaky_relu_forward,
-    tanh: tanh_forward,
-}
 
-activation_backward_dict = {
-    sigmoid: sigmoid_backward,
-    relu: relu_backward,
-    leaky_relu: leaky_relu_backward,
-    tanh: tanh_backward,
-}
+Activation = namedtuple('Activation', 'name, forward, backward')
+
+sigmoid = Activation('sigmoid', sigmoid_forward, sigmoid_backward)
+tanh = Activation('tanh', tanh_forward, tanh_backward)
+relu = Activation('relu', relu_forward, relu_backward)
+softmax = Activation('softmax', softmax_forward, softmax_backward)
+leaky_relu = Activation('leaky_relu', leaky_relu_forward, leaky_relu_backward)
