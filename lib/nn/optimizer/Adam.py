@@ -25,7 +25,7 @@ def adam_update_param_f(optimizer, to_avg):
         nonlocal t
 
         current_cache, next_cache = cache
-        A_prev, current_param = current_cache
+        _, current_param = current_cache
 
         vcd = 1 / (1 - (beta1 ** t))
         scd = 1 / (1 - (beta2 ** t))
