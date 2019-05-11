@@ -60,7 +60,7 @@ gd = nn.gradient_descent(loss, 5000)
 sgd = nn.stochastic(loss, 100)
 momentum = nn.momentum(loss, 10)
 rms = nn.rms_prop(loss, 10)
-adam = nn.adam(loss, 5)
+adam = nn.adam(loss, 7)
 
 model = nn.Model(X, adam)
 

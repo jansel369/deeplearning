@@ -8,13 +8,13 @@ from collections import namedtuple
 
 """ Declare model configuration types
 """
-
 Config = namedtuple('Config', 'layers, forwards, backwards')
 LayerConfig = namedtuple('LayerConfig', 'units, activation, initialization, batch_norm, sequence')
+ConvLayer = namedtuple('ConvLayer', 'padding, stride, channels, activation, batch_norm')
+
 
 """ Helper functions
 """
-
 def create_layer_config(units, activation='linear'):
     layer = LayerConfig(units, activation, 'std', False, ['liniar'])
 
@@ -29,6 +29,9 @@ def update_layer_config(config, activation, init):
     config.layers[-1] = LayerConfig(a, activation, init, d, sequence)
 
     return config
+
+def create_conv_layer_config(padding, stride, channels):
+    return ConvLayer(padding, stride, channels, 'liniar', False)
 
 """ liniar functions
 """
@@ -52,6 +55,16 @@ def layer(units):
         return config
 
     return a
+
+"""Convolution functions
+"""
+
+def conv(padding, stride, channels):
+    def f(config):
+        conv_layer = create_conv_layer_config(padding, stride, channels)
+        config.layers.append(conv_layer)
+        config.forwards.append(propagation.conv_forward_a(padding, stride, channels))
+
 
 def batch_norm():
     def f(config):
