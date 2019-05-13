@@ -1,7 +1,7 @@
 import torch as pt
 
 def weight_std(n, n_prev, device):
-    return pt.randn(n, n_prev, dtype=pt.double, device=device)
+    return pt.randn(n_prev, n, dtype=pt.double, device=device)
 
 def weight_he(n, n_prev, device):
     W = weight_std(n, n_prev, device)
@@ -14,10 +14,10 @@ def weight_glorot(n, n_prev, device):
     return W * ((1 / n_prev) ** 0.5)
 
 def bias_std(n, n_prev, device):
-    return pt.zeros(n, 1, dtype=pt.double, device=device)
+    return pt.zeros(1, n, dtype=pt.double, device=device)
 
 def gamma_batch_norm_std(n, n_prev, device):
-    return pt.ones(n, 1, dtype=pt.double, device=device)
+    return pt.ones(1, n, dtype=pt.double, device=device)
 
 def beta_batch_norm_std(n, n_prev, device):
     return bias_std(n, n_prev, device)

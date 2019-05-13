@@ -22,7 +22,7 @@ def gd_update_param_f(optimizer, to_avg):
 def gradient_optimization(X, Y, parameters, optimizer, forwards, backwards, print_cost=False):
     costs = []
     iterations = optimizer.iterations
-    m = Y.shape[1]
+    m = Y.shape[0]
     to_avg = 1 / m
     
     compute_cost = optimizer.loss.compute_cost

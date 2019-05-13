@@ -30,12 +30,13 @@ def tanh_forward(Z):
 
     return G
 
-def softmax_forward(Z, ndim=0):
+def softmax_forward(Z, fdim=1):
     # e = Z.exp()
     # stable version
-    e = pt.exp(Z - Z.max(ndim)[0])
+    # take the max value in every data
+    e = pt.exp(Z - Z.max(fdim, keepdim=True)[0])
 
-    return e / e.sum(ndim)
+    return e / e.sum(fdim)
 
 def sigmoid_backward(A):
     # g'(z)

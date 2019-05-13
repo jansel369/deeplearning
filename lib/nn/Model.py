@@ -18,10 +18,10 @@ class Model():
 
     def fit(self, X_train, Y_train, is_printable_cost=False, device=get_device()):
         layers = self.config.layers
-        input_size = layers[0].units
-        output_size = layers[-1].units
-        n = X_train.shape[0]
-        o = Y_train.shape[0]
+        input_size = layers[1].units
+        output_size = layers[0].units
+        n = X_train.shape[1]
+        o = Y_train.shape[1]
 
         assert input_size == n, 'Invalid input size: ' + str(input_size) + ' : ' + str(n)
         assert output_size == o, 'Invalid output size: ' + str(output_size) + ' : ' + str(o)

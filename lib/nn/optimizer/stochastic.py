@@ -10,16 +10,16 @@ def stochastic_optimization(X, Y, parameters, optimizer, forwards, backwards, pr
     opochs = optimizer.epochs
     batch_size = optimizer.batch_size
     to_avg = 1 / batch_size
-    m = Y.shape[1]
-    batch_count = int(m / batch_size)
+    m = Y.shape[0]
     
     compute_cost = optimizer.loss.compute_cost
     forward_prop = forward_propagation(forwards, True)
     back_prop = construct_backwards(backwards, optimizer, to_avg)
 
-    X_batches = X.split(batch_size, 1)
-    Y_batches = Y.split(batch_size, 1)
+    X_batches = X.split(batch_size, 0)
+    Y_batches = Y.split(batch_size, 0)
 
+    batch_count = Y_batches[0]
     total_iterations = 0
 
     for i in range(opochs):

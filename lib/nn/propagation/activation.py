@@ -14,11 +14,11 @@ def activation_grad_a(): # called from architecture
         def activation_grad(dZ, param_grad, cache, parameters): # called during backprop
             (_, [W, _]), next_cache = cache
 
-            dA = W.t().mm(dZ)
+            dA = dZ.mm(W.t())
 
             return dA, param_grad, cache, parameters
 
         return activation_grad
     
     return activation_grad_f2
- 
+  

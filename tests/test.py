@@ -61,7 +61,7 @@
 # t()
 
 
-a = [1, 2, 3, 4]
+# a = [1, 2, 3, 4]
 
-for i in reversed(a):
-    print(i)
+# for c, i in a:
+#     print(c, i)
