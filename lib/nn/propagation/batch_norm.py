@@ -3,7 +3,6 @@ import torch as pt
 
 """ batch norm
     https://arxiv.org/abs/1502.03167v1
-    https://deepnotes.io/batchnorm
 """
 
 def batch_norm_forward(Z, params, has_cache, cache):

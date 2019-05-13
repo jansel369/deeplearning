@@ -1,4 +1,5 @@
 from torch.nn.functional import pad
+from .liniar import liniar_forward
 
 def conv_single_step(a_slice, W, b):
     return (a_slice * W).sum() + b.sum()
@@ -41,6 +42,8 @@ def conv_forward_a(p, s, n_C):
 
         return Z, next_params, cache
 
+
+
 def max_pool(a):
     return a.max()
 
@@ -78,12 +81,22 @@ def pool_forward_a(f, s, pool=max_pool):
 
     return pool_forward
 
-def fully_connected(A_prev, params, has_cache, cache):
-    m, _, _, _ = A_prev.shape
-    current_params, next_params = params
-    W, b = current_params
+def flatten_forward(A_prev, params, has_cache, cache):
+    shape = A_prev.shape
 
-    A_reshape = A_prev.reshape(m, -1)
-    
 
-    return 
+    A_prev_flat = A_prev.reshape(shape[0], -1).t()
+
+    cache = (shape, cache) if has_cache else None
+
+    return A_prev_flat, params, cache
+
+
+fully_connected = liniar_forward
+
+def flatten_backward(dA, param_grad, cache, parameters):
+    shape, next_cache = cache
+
+    dA_vol = dA.t().reshape(shape)
+
+    return dA_vol, param_grad, next_cache, parameters

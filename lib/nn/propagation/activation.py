@@ -21,3 +21,4 @@ def activation_grad_a(): # called from architecture
         return activation_grad
     
     return activation_grad_f2
+ 
