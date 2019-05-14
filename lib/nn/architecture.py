@@ -48,9 +48,9 @@ def layer(units):
         config.forwards.append(propagation.liniar_forward)
         config.layers.append(layer)
         
-        config.backwards.append(propagation.activation_grad_a()) # calculates dA
+        config.backwards.append(propagation.liniar_backward_a()) # calculates dA
         config.backwards.append(propagation.update_param_a()) # update parameter W, b
-        config.backwards.append(propagation.param_grad_a()) # calculate gradient dW, db
+        config.backwards.append(propagation.liniar_param_grad_a()) # calculate gradient dW, db
 
         return config
 
@@ -76,7 +76,7 @@ def batch_norm():
 
         config.forwards.append(propagation.batch_norm_forward)
 
-        config.backwards[-1] = propagation.param_grad_a(propagation.bn_prams_grad_f)  # change param grad from dW, db to only dW
+        config.backwards[-1] = propagation.liniar_param_grad_a(propagation.bn_prams_grad_f)  # change param grad from dW, db to only dW
         config.backwards.append(propagation.batch_norm_grad_a()) # calculate dZ from batch norm
         config.backwards.append(propagation.update_param_a()) # update param gamma, beta
         config.backwards.append(propagation.bn_param_grad_a()) # calculate grad dgamma, dbeta

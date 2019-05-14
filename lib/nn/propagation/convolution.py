@@ -1,6 +1,17 @@
 from torch.nn.functional import pad
 from .liniar import liniar_forward
 
+def _zero_pad(A, p):
+    return pad(A_prev, (0, 0, p, p, p, p), 'constant', 0.)
+
+def _A_slice(A, h, w, s, f):
+    h_start = h * s # vertical
+    h_end = h_start + f
+    w_start = w * s # horizontal
+    w_end = w_start + f
+
+    return A[h_start:h_end, w_start:w_end, :] # a_slice of A_prev
+
 def conv_single_step(a_slice, W, b):
     return (a_slice * W).sum() + b.sum()
 
@@ -18,8 +29,8 @@ def conv_forward_a(p, s, n_C):
 
         # initialize output volume
         Z = pt.zeros((m, n_H, n_W, n_C), device=A_prev.device)
-        pad_size = (0, 0, p, p, p, p)
-        A_prev_pad = pad(A_prev, pad_size, 'constant', 0.)
+        
+        A_prev_pad = _zero_pad(A_prev, p)
 
         for i in range(m):
             
@@ -28,12 +39,7 @@ def conv_forward_a(p, s, n_C):
             for h in range(n_H):
                 for w in range(n_W):
 
-                    h_start = h * s # vertical
-                    h_end = h_start + f
-                    w_start = w * s # horizontal
-                    w_end = w_start + f
-
-                    a_prev_slice = a_prev_pad[h_start:h_end, w_start:w_end, :] # a_slice of A_prev
+                    a_prev_slice = _A_slice(a_prev_pad, h, w, s, f)
                   
                     for c in range(n_C): # loop over the number of filters
                         Z[i, h, w, c] = conv_single_step(a_prev_slice, W[:, :, :, c], b[:, :, :, c])
@@ -65,12 +71,7 @@ def pool_forward_a(f, s, pool=max_pool):
 
             for h in range(n_H):
                 for w in range(n_W):
-                    h_start = h * s # vertical
-                    h_end = h_start + f
-                    w_start = w * s # horizontal
-                    w_end = w_start + f
-
-                    a_prev_slice = a_prev_pad[h_start:h_end, w_start:w_end, :]
+                    a_prev_slice = _A_slice(a_prev_pad, h, w, s, f)
 
                     for c in range(n_C):
                         A[i, h, w, c] = pool(a_prev_slice[:, :, c])
@@ -85,7 +86,7 @@ def flatten_forward(A_prev, params, has_cache, cache):
     shape = A_prev.shape
 
 
-    A_prev_flat = A_prev.reshape(shape[0], -1).t()
+    A_prev_flat = A_prev.reshape(shape[0], -1)
 
     cache = (shape, cache) if has_cache else None
 
@@ -94,9 +95,107 @@ def flatten_forward(A_prev, params, has_cache, cache):
 
 fully_connected = liniar_forward
 
-def flatten_backward(dA, param_grad, cache, parameters):
-    shape, next_cache = cache
 
-    dA_vol = dA.t().reshape(shape)
+def flatten_backward_i(optimizer, to_avg): 
+    def flatten_backward(dA, param_grad, cache, parameters):
+        shape, next_cache = cache
 
-    return dA_vol, param_grad, next_cache, parameters
+        dA_vol = dA.reshape(shape)
+
+        return dA_vol, param_grad, next_cache, parameters
+
+    return flatten_backward
+
+def conv_backward_a():
+    """ Backprop to calculate dL/dA
+    """
+    def conv_backward_i(optimizer, to_avg):
+        def conv_backward(dZ, param_grad, cache, parameters):
+            current_cache, _ = cache
+            (A_prev, p, s, n_C), [W, b] = current_cache
+            m, n_H_prev, n_W_prev, n_C_prev = A_prev.shape
+            m, n_H, n_W, n_C = dZ.shape
+            f, f, n_C_prev, n_C = W.shape
+
+            dA = pt.zeros((m, n_H_prev, n_W_prev, n_C_prev))  
+            A_prev_pad = _zero_pad(A_prev, p)
+            dA_pad = _zero_pad(dA, pad)
+
+            for i in range(m):
+                a_prev_pad = A_prev_pad[i]
+                da_pad = dA_pad[i]
+
+                for h in range(n_H):
+                    for w in range(n_W):
+                        h_start = h * s # vertical
+                        h_end = h_start + f
+                        w_start = w * s # horizontal
+                        w_end = w_start + f
+                        a_prev_slice = a_prev_pad[h_start:h_end, w_start:w_end, :]
+
+                        for c in range(n_C):
+                            da_pad[h_start:h_end, w_start:w_end, :] += W[:, :, :, c] * dZ[i, h, w, c]
+
+                dA[i, :, :, :] = da_pad[p:-p, p:-p, :]
+
+            return dA, param_grad, cache, parameters
+        
+        return conv_backward
+    return conv_backward_i
+
+""" Helper functions: Calculating gradient parameters dW, db for conv and bn
+"""
+def std_param_grad_f(dZ, i, h, w, c):
+    return dZ[i, h, w, c]
+
+def bn_param_grad_f(dZ, i, h, w, c):
+    return 0
+
+def conv_param_grad_a(select_grad):
+    """ Backprop to calcualte dL/dW and dL/db
+    """
+    def conv_param_grad_f(optimizer, to_avg):
+        def calclulate_conv_param_grad(dZ, param_grad, cache, parameters):
+            current_cache, _ = cache
+            (A_prev, p, s, n_C), [W, b] = current_cache
+            m, n_H_prev, n_W_prev, n_C_prev = A_prev.shape
+            m, n_H, n_W, n_C = dZ.shape
+            f, f, n_C_prev, n_C = W.shape
+
+            dW = pt.zeros((f, f, n_C_prev, n_C))
+            db = pt.zeros((1, 1, 1, n_C))
+            A_prev_pad = _zero_pad(A_prev, p)
+
+            for i in range(m):
+                a_prev_pad = A_prev_pad[i]
+
+                for h in range(n_H):
+                    for w in range(n_W):
+                        a_prev_slice = _A_slice(a_prev_pad, h, w, s, f)
+
+                        for c in range(n_C):
+                            dW[:,:,:,c] += a_prev_slice * dZ[i, h, w, c]
+                            db[:,:,:,c] += select_grad(dZ, i, h, w, c)
+
+            dW *= to_avg
+            db *= to_avg
+
+            return dZ, [dW, db], cache, parameters
+        
+        return calclulate_conv_param_grad
+    return conv_param_grad_f
+
+def conv_grad_a(activation_backward):
+    """ Backprop calculating grad dL/dZ
+    """
+    def conv_grad_i(optimizer, to_avg):
+        def conv_grad(dA, param_grad, cache, parameters):
+            current_cache, next_cache = cache
+            (A, _, _, _), _ = current_cache
+
+            dZ = dA * activation_backward(A)
+
+            return dZ, param_grad, next_cache, parameters
+        
+        return conv_grad
+    return conv_grad_i
