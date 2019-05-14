@@ -18,13 +18,13 @@ class Model():
 
     def fit(self, X_train, Y_train, is_printable_cost=False, device=get_device()):
         layers = self.config.layers
-        input_size = layers[1].units
-        output_size = layers[0].units
-        n = X_train.shape[1]
-        o = Y_train.shape[1]
+        n_0 = layers[0].units
+        n_L = layers[-1].units
+        n_0a = X_train.shape[1]
+        n_La = Y_train.shape[1]
 
-        assert input_size == n, 'Invalid input size: ' + str(input_size) + ' : ' + str(n)
-        assert output_size == o, 'Invalid output size: ' + str(output_size) + ' : ' + str(o)
+        assert n_0 == n_0a, 'Invalid input size: ' + str(n_0) + ' & ' + str(n_0a)
+        assert n_L == n_La, 'Invalid output size: ' + str(n_L) + ' & ' + str(n_La)
 
         forwards = self.config.forwards
         backwards = self.config.backwards

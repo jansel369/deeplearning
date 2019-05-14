@@ -20,14 +20,14 @@ def mnist_data():
     mnist = data_source.read_data_sets("datasets/mnist/data/", one_hot=True)
     device = nn.get_device()
 
-    X_train = nn.from_numpy(mnist.train.images.T, device)#[:, 0:3000]
-    Y_train = nn.from_numpy(mnist.train.labels.T, device)#[:, 0:3000]
+    X_train = nn.from_numpy(mnist.train.images, device)#[:, 0:3000]
+    Y_train = nn.from_numpy(mnist.train.labels, device)#[:, 0:3000]
 
-    X_test = nn.from_numpy(mnist.test.images.T, device)
-    Y_test = nn.from_numpy(mnist.test.labels.T, device)
+    X_test = nn.from_numpy(mnist.test.images, device)
+    Y_test = nn.from_numpy(mnist.test.labels, device)
 
-    X_validation = nn.from_numpy(mnist.validation.images.T, device)
-    Y_validation = nn.from_numpy(mnist.validation.labels.T, device)
+    X_validation = nn.from_numpy(mnist.validation.images, device)
+    Y_validation = nn.from_numpy(mnist.validation.labels, device)
 
     print("\ntrain shape: X=%s, Y=%s" % (X_train.shape, Y_train.shape))
     print("validation shape: X=%s, Y=%s" % (X_validation.shape, Y_validation.shape))
@@ -42,7 +42,7 @@ X_train, Y_train, X_test, Y_test, X_validation, Y_validation = mnist_data()
 X_train = X_train#[:, 0:4000]
 Y_train = Y_train#[:, 0:4000]
 
-n = X_train.shape[0]
+n = X_train.shape[1]
 relu = nna.relu()
 
 X = nna.input(n)

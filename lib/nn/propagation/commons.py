@@ -21,6 +21,7 @@ def backward_propagation(backwards, loss):
         dZ = loss.grad_loss(AL, Y)
 
         for backward in reversed(backwards):
+            # print('Backward name: ', backward.__name__)
             dZ, param_grad, cache, parameters = backward(dZ, param_grad, cache, parameters)
 
         return parameters

@@ -1,3 +1,4 @@
+import math
 
 from collections import namedtuple
 from nn.propagation import construct_backwards, forward_propagation
@@ -11,7 +12,8 @@ def stochastic_optimization(X, Y, parameters, optimizer, forwards, backwards, pr
     batch_size = optimizer.batch_size
     to_avg = 1 / batch_size
     m = Y.shape[0]
-    
+    batch_count = math.ceil(m / batch_size)
+
     compute_cost = optimizer.loss.compute_cost
     forward_prop = forward_propagation(forwards, True)
     back_prop = construct_backwards(backwards, optimizer, to_avg)
@@ -19,8 +21,9 @@ def stochastic_optimization(X, Y, parameters, optimizer, forwards, backwards, pr
     X_batches = X.split(batch_size, 0)
     Y_batches = Y.split(batch_size, 0)
 
-    batch_count = Y_batches[0]
     total_iterations = 0
+
+    print("batch count: ", batch_count)
 
     for i in range(opochs):
         for t in range(batch_count):

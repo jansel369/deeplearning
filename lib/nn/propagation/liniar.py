@@ -1,7 +1,7 @@
 
 def liniar_forward(A_prev, params, has_cache, cache):
     """cache format
-        ((A_prev, [W, b]), ((A_prev, [W, b]),...))
+        ((A_prev, [W, b]), (((**other cahche), [W, b]),...))
     """
 
     current_params, next_params = params
@@ -43,8 +43,8 @@ def liniar_grad_f(activation_backward):
 def weight_grad(dZ, avg, A_prev):
     return avg * A_prev.t().mm(dZ)
 
-def bias_grad(dZ, avg):
-    return avg * dZ.sum(dim=0, keepdim=True)
+def bias_grad(dZ, avg, fdim=0):
+    return avg * dZ.sum(dim=fdim, keepdim=True)
 
 def std_params_grad_f(dZ, A_prev, to_avg):
     dW = weight_grad(dZ, to_avg, A_prev)
