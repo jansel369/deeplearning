@@ -35,7 +35,14 @@ def liniar_backward_a(): # called from architecture
         return liniar_backward
     
     return liniar_backward_i
-  
+
+def activation_forward_a(activation):
+    def activation_forward(Z, params, has_cache, cache):
+        A = activation(Z)
+
+        return A, params, cache
+
+    return activation_forward
 
 def liniar_grad_f(activation_backward):
     """ Backprop function to calculate grad dL/dz
