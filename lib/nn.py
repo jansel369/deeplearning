@@ -1,16 +1,14 @@
-from .backend import activation as a
 import torch as pt
 import copy
+
+from .backend import activation as a
 from . import propagation as prop
 
 from collections import namedtuple
-
-
 """ Declare model configuration types
 """
+Config = namedtuple('Config', 'layers, forwards, backwards')
 LayerConfig = namedtuple('LayerConfig', 'units, activation, initialization, batch_norm, sequence')
-ConvLayer = namedtuple('ConvLayer', 'filters, channels, padding, stride, activation, batch_norm')
-
 
 """ Helper functions
 """
@@ -29,12 +27,8 @@ def update_layer_config(config, activation, init):
 
     return config
 
-def create_conv_layer_config(padding, stride, channels):
-    return ConvLayer(padding, stride, channels, None, None, None, 'liniar', False)
-
 """ liniar functions
 """
-
 def input(units):
     layer = LayerConfig(units, 'liniar', 'std', False, ['input'])
     config = Config([layer], [], [])
@@ -54,43 +48,6 @@ def layer(units):
         return config
 
     return a
-
-"""Convolution functions
-"""
-
-def conv_input(img_height, img_width, img_channels):
-    # layer = ConvLayer(img_height, img_width, img_channels, None, None, None, 'liniar', False)
-    config = Config([], [], [])
-
-    return config
-
-def conv(filters, channels, padding, stride):
-    def f(config):
-        conv_layer = ConvLayer(filters, channels, padding, stride, 'liniar', False)
-        config.layers.append(conv_layer)
-        config.forwards.append(prop.conv_forward_a(padding, stride, channels))
-        config.backwards.append(props.conv_backward_a())
-
-
-def batch_norm():
-    def f(config):
-        layer = config.layers[-1]
-        a, b, c, _, sequence = layer
-        sequence.append('batch_norm')
-
-        config.layers[-1] = LayerConfig(a, b, c, True, sequence)
-
-        config.forwards.append(prop.batch_norm_forward)
-
-        config.backwards[-1] = prop.liniar_param_grad_a(prop.bn_prams_grad_f)  # change param grad from dW, db to only dW
-        config.backwards.append(prop.batch_norm_grad_a()) # calculate dZ from batch norm
-        config.backwards.append(prop.update_param_a()) # update param gamma, beta
-        config.backwards.append(prop.bn_param_grad_a()) # calculate grad dgamma, dbeta
-
-        return config
-
-    return f
-
 
 """ activations functions
 """

@@ -5,7 +5,8 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../datasets")
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../utils")
 
 import  nn
-from nn import architecture as nna
+import contrib
+# from nn import architecture as nna
 import torch as pt
 import unittest
 from loader import *
@@ -43,26 +44,26 @@ X_train = X_train#[:, 0:4000]
 Y_train = Y_train#[:, 0:4000]
 
 n = X_train.shape[1]
-relu = nna.relu()
+relu = nn.relu()
 
-X = nna.input(n)
-X = nna.layer(50)(X)
-X = nna.batch_norm()(X)
+X = nn.input(n)
+X = nn.layer(50)(X)
+X = nn.batch_norm()(X)
 X = relu(X)
-X = nna.layer(20)(X)
+X = nn.layer(20)(X)
 X = relu(X)
-X = nna.layer(10)(X)
-X = nna.softmax()(X)
+X = nn.layer(10)(X)
+X = nn.softmax()(X)
 
-loss = nn.loss.categorical_crossentropy
+loss = contrib.loss.categorical_crossentropy
 
-gd = nn.gradient_descent(loss, 5000)
-sgd = nn.stochastic(loss, 100)
-momentum = nn.momentum(loss, 10)
-rms = nn.rms_prop(loss, 10)
-adam = nn.adam(loss, 7)
+gd = contrib.gradient_descent(loss, 5000)
+sgd = contrib.stochastic(loss, 100)
+momentum = contrib.momentum(loss, 10)
+rms = contrib.rms_prop(loss, 10)
+adam = contrib.adam(loss, 7)
 
-model = nn.Model(X, adam)
+model = contrib.Model(X, adam)
 
 print("fitting model....")
 

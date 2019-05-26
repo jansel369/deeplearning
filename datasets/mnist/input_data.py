@@ -73,7 +73,7 @@ def extract_labels(filename, one_hot=False):
 
 
 class DataSet(object):
-    def __init__(self, images, labels, fake_data=False):
+    def __init__(self, images, labels, reshape=True, fake_data=False):
         if fake_data:
             self._num_examples = 10000
         else:
@@ -84,9 +84,10 @@ class DataSet(object):
             # Convert shape from [num examples, rows, columns, depth]
             # to [num examples, rows*columns] (assuming depth == 1)
             assert images.shape[3] == 1
-            images = images.reshape(images.shape[0],
-                                    images.shape[1] * images.shape[2])
-            # Convert from [0, 255] -> [0.0, 1.0].
+            if reshape:
+                images = images.reshape(images.shape[0],
+                                        images.shape[1] * images.shape[2])
+                # Convert from [0, 255] -> [0.0, 1.0].
             images = images.astype(numpy.float32)
             images = numpy.multiply(images, 1.0 / 255.0)
         self._images = images
@@ -135,7 +136,7 @@ class DataSet(object):
         return self._images[start:end], self._labels[start:end]
 
 
-def read_data_sets(train_dir, fake_data=False, one_hot=False):
+def read_data_sets(train_dir, reshape=True, fake_data=False, one_hot=False):
     class DataSets(object):
         pass
     data_sets = DataSets()
@@ -161,7 +162,7 @@ def read_data_sets(train_dir, fake_data=False, one_hot=False):
     validation_labels = train_labels[:VALIDATION_SIZE]
     train_images = train_images[VALIDATION_SIZE:]
     train_labels = train_labels[VALIDATION_SIZE:]
-    data_sets.train = DataSet(train_images, train_labels)
-    data_sets.validation = DataSet(validation_images, validation_labels)
-    data_sets.test = DataSet(test_images, test_labels)
+    data_sets.train = DataSet(train_images, train_labels, reshape)
+    data_sets.validation = DataSet(validation_images, validation_labels, reshape)
+    data_sets.test = DataSet(test_images, test_labels, reshape)
     return data_sets

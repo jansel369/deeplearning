@@ -35,8 +35,7 @@ def conv_forward_a(p, s, n_C):
         
         A_prev_pad = _zero_pad(A_prev, p)
 
-        for i in range(m):
-            
+        for i in range(m):  
             a_prev_pad = A_prev_pad[i]
 
             for h in range(n_H):
@@ -50,6 +49,45 @@ def conv_forward_a(p, s, n_C):
 
         return Z, next_params, cache
 
+def conv_backward_a():
+    """ Backprop to calculate dL/dA
+    """
+    def conv_backward_i(optimizer, to_avg):
+        def conv_backward(dZ, param_grad, cache, parameters):
+            current_cache, _ = cache
+            (A_prev, p, s, n_C), [W, b] = current_cache
+            m, n_H_prev, n_W_prev, n_C_prev = A_prev.shape
+            m, n_H, n_W, n_C = dZ.shape
+            f, f, n_C_prev, n_C = W.shape
+
+            dA = pt.zeros((m, n_H_prev, n_W_prev, n_C_prev))  
+            A_prev_pad = _zero_pad(A_prev, p)
+            dA_pad = _zero_pad(dA, pad)
+
+            for i in range(m):
+                a_prev_pad = A_prev_pad[i]
+                da_pad = dA_pad[i]
+
+                for h in range(n_H):
+                    for w in range(n_W):
+                        h_start = h * s # vertical
+                        h_end = h_start + f
+                        w_start = w * s # horizontal
+                        w_end = w_start + f
+                        a_prev_slice = a_prev_pad[h_start:h_end, w_start:w_end, :]
+
+                        for c in range(n_C):
+                            da_pad[h_start:h_end, w_start:w_end, :] += W[:, :, :, c] * dZ[i, h, w, c]
+
+                dA[i, :, :, :] = da_pad[p:-p, p:-p, :]
+
+            return dA, param_grad, cache, parameters
+        
+        return conv_backward
+    return conv_backward_i
+
+
+
 """ Helper functions: Calculating gradient parameters dW, db for conv and bn
 """
 def std_param_grad_f(dZ, i, h, w, c):
@@ -58,7 +96,7 @@ def std_param_grad_f(dZ, i, h, w, c):
 def bn_param_grad_f(dZ, i, h, w, c):
     return 0
 
-def conv_param_grad_a(select_grad):
+def conv_param_grad_a(select_grad=std_param_grad_f):
     """ Backprop to calcualte dL/dW and dL/db
     """
     def conv_param_grad_f(optimizer, to_avg):
@@ -184,10 +222,10 @@ def _pool_backward_a(type_pool_backward):
 
             return dA_prev, param_grad, next_cache, parameters
 
-def max_pool_backward():
+def max_pool_backward_a():
     return _pool_backward_a(_max_pool_mask)
 
-def avg_pool_backward():
+def avg_pool_backward_a():
     return _pool_backward_a(_avg_value_distribute)
 
 """ Flatting
@@ -203,7 +241,7 @@ def flatten_forward(A_prev, params, has_cache, cache):
     return A_prev_flat, params, cache
 
 
-fully_connected = liniar_forward
+# fully_connected = liniar_forward
 
 
 def flatten_backward_i(optimizer, to_avg): 
@@ -215,41 +253,3 @@ def flatten_backward_i(optimizer, to_avg):
         return dA_vol, param_grad, next_cache, parameters
 
     return flatten_backward
-
-def conv_backward_a():
-    """ Backprop to calculate dL/dA
-    """
-    def conv_backward_i(optimizer, to_avg):
-        def conv_backward(dZ, param_grad, cache, parameters):
-            current_cache, _ = cache
-            (A_prev, p, s, n_C), [W, b] = current_cache
-            m, n_H_prev, n_W_prev, n_C_prev = A_prev.shape
-            m, n_H, n_W, n_C = dZ.shape
-            f, f, n_C_prev, n_C = W.shape
-
-            dA = pt.zeros((m, n_H_prev, n_W_prev, n_C_prev))  
-            A_prev_pad = _zero_pad(A_prev, p)
-            dA_pad = _zero_pad(dA, pad)
-
-            for i in range(m):
-                a_prev_pad = A_prev_pad[i]
-                da_pad = dA_pad[i]
-
-                for h in range(n_H):
-                    for w in range(n_W):
-                        h_start = h * s # vertical
-                        h_end = h_start + f
-                        w_start = w * s # horizontal
-                        w_end = w_start + f
-                        a_prev_slice = a_prev_pad[h_start:h_end, w_start:w_end, :]
-
-                        for c in range(n_C):
-                            da_pad[h_start:h_end, w_start:w_end, :] += W[:, :, :, c] * dZ[i, h, w, c]
-
-                dA[i, :, :, :] = da_pad[p:-p, p:-p, :]
-
-            return dA, param_grad, cache, parameters
-        
-        return conv_backward
-    return conv_backward_i
-
