@@ -3,12 +3,12 @@ import torch as pt
 import time
 import datetime
 
-from .commons import *
-from .optimizer import *
+from commons import *
+from optimizer import *
 
-from . import parameters as params
-from . import initialization as init
-from . import propagation as p
+import parameters as params
+import initialization as init
+import propagation as p
 
 class Model():
     def __init__(self, config, optimizer):

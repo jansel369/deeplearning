@@ -1,6 +1,6 @@
-from .commons import *
-from .Model import Model
+from commons import *
+import Model
 
-from . import optimizer
-from .optimizer import *
-from . import loss
+import optimizer
+from optimizer import *
+import loss

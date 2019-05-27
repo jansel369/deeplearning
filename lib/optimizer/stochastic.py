@@ -1,7 +1,7 @@
 import math
 
 from collections import namedtuple
-from nn.propagation import construct_backwards, forward_propagation
+from propagation import construct_backwards, forward_propagation
 from .gradient_descent import gd_update_param_f
 
 GradientDescent = namedtuple('GradientDescent', 'loss, epochs, batch_size, learning_rate, optimize, param_update_f')

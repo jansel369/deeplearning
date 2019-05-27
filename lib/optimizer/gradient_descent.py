@@ -1,6 +1,6 @@
 
 from collections import namedtuple
-from nn.propagation import construct_backwards, forward_propagation
+from propagation import construct_backwards, forward_propagation
 
 GradientDescent = namedtuple('GradientDescent', 'loss, iterations, learning_rate, optimize, param_update_f')
 

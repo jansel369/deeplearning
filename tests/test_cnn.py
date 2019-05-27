@@ -1,14 +1,17 @@
 import sys
 import os
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/..")
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../lib")
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../datasets")
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../utils")
 
-# import  nn
+import  nn
+import cnn
 import contrib
-# from nn import architecture as nna
+
 import torch as pt
 import unittest
+
 from loader import *
 from data_divider import *
 from plot_cost import *
@@ -34,4 +37,5 @@ print("\ntrain shape: X=%s, Y=%s" % (X_train.shape, Y_train.shape))
 print("validation shape: X=%s, Y=%s" % (X_validation.shape, Y_validation.shape))
 print("test shape: X=%s, Y=%s" % (X_test.shape, Y_test.shape))
 
+# testing lenet-5 architecture
 

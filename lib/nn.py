@@ -1,8 +1,8 @@
 import torch as pt
 import copy
 
-from .backend import activation as a
-from . import propagation as prop
+import propagation as prop
+import backend.activation as a
 
 from collections import namedtuple
 """ Declare model configuration types

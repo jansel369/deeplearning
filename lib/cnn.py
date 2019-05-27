@@ -1,8 +1,8 @@
-from .backend import activation as a
+from backend import activation as a
 import torch as pt
 import copy
-from . import propagation as prop
-from .nn import Config
+import propagation as prop
+from nn import Config
 from collections import namedtuple
 
 ConvLayer = namedtuple('ConvLayer', 'filters, channels, padding, stride, activation, batch_norm')

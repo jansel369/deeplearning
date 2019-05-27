@@ -1,5 +1,5 @@
 import torch as pt
-from . import initialization as init
+import initialization as init
 
 
 """ parameters format: ((W1, b1), ((W2, b2), ((gamma2, beta2), ((W3,b3), ...))))
