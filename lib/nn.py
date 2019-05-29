@@ -1,6 +1,6 @@
 import torch as pt
 import copy
-
+import initialization as init
 import propagation as prop
 import backend.activation as a
 
@@ -52,7 +52,7 @@ def layer(units):
 """ activations functions
 """
 
-def relu(init='he'):
+def relu(init=init.liniar_he_layers):
     def f(config):
         config = update_layer_config(config, a.relu, init)
         config.forwards.append(prop.activation_forward_a(a.relu.forward))
@@ -62,7 +62,7 @@ def relu(init='he'):
 
     return f
 
-def sigmoid(init='glorot'):
+def sigmoid(init=init.liniar_glorot_layers):
     def f(config):
         config = update_layer_config(config, a.sigmoid, init)
         config.forwards.append(prop.activation_forward_a(a.sigmoid.forward))
@@ -71,7 +71,7 @@ def sigmoid(init='glorot'):
         return config
     return f
 
-def softmax(init='glorot'):
+def softmax(init=init.liniar_glorot_layers):
     def f(config):
         config = update_layer_config(config, a.softmax, init)
         config.forwards.append(prop.activation_forward_a(a.softmax.forward))

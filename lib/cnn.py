@@ -4,29 +4,39 @@ import copy
 import propagation as prop
 from nn import Config
 from collections import namedtuple
+import initialization as init
 
-ConvLayer = namedtuple('ConvLayer', 'filters, channels, padding, stride, activation, batch_norm')
-PoolLayer = namedtuple('PoolLayer', 'type')
+VolOutput = namedtuple('VolOutout', 'height, width, channels')
+ConvLayer = namedtuple('ConvLayer', 'vol_output, filters, channels, padding, stride, activation, initialization, batch_norm')
+PoolLayer = namedtuple('PoolLayer', 'units')
 
-def update_conv_config(config, activation):
+def _update_conv_config(config, activation, init):
     layer = config.layers[-1]
-    f, n_C, p, s, _, bn = layer
-    config.layers[-1] = ConvLayer(f, n_C, p, s, activation, bn)
+    f, n_C, p, s, _, _, bn = layer
+    config.layers[-1] = ConvLayer(f, n_C, p, s, activation, init, bn)
 
     return config
+
+def _calculate_side(prev_side, filter, padding, stride):
+    return int(((prev_side + 2 * padding - filter) / stride) + 1)
 
 """Convolution functions
 """
 
 def conv_input(img_height, img_width, img_channels):
-    # layer = ConvLayer(img_height, img_width, img_channels, None, None, None, 'liniar', False)
-    config = Config([], [], [])
+    vol_output = VolOutput(img_height, img_width, img_channels)
+    layer = ConvLayer(vol_output, None, None, None, None, None, None, False)
+    config = Config([layer], [], [])
 
     return config
 
 def conv(filters, channels, padding, stride):
     def f(config):
-        conv_layer = ConvLayer(filters, channels, padding, stride, 'liniar', False)
+        prev_side = config.layers[-1].vol_output.height
+        side = _calculate_side(prev_side, filters, padding, stride)
+        vol_output = VolOutput(side, side, channels)
+        conv_layer = ConvLayer(vol_output, filters, channels, padding, stride, 'liniar', 'std', False)
+        
         config.layers.append(conv_layer)
         
         config.forwards.append(prop.conv_forward_a(padding, stride, channels))
@@ -36,9 +46,9 @@ def conv(filters, channels, padding, stride):
         config.backwards.append(prop.conv_param_grad_a())
 
 
-def relu():
+def relu(initialization=init.conv_he_layers):
     def f(config):
-        config = update_conv_config(config, a.relu)
+        config = _update_conv_config(config, a.relu, init)
         config.forwards.append(prop.activation_forward_a(a.relu.forward))
         config.backwards.appen(prop.conv_grad_a(a.relu.backward))
 

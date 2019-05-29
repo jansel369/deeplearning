@@ -39,3 +39,4 @@ print("test shape: X=%s, Y=%s" % (X_test.shape, Y_test.shape))
 
 # testing lenet-5 architecture
 
+X = cnn.conv(5, 6, 0, 1) 

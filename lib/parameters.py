@@ -5,26 +5,60 @@ import initialization as init
 """ parameters format: ((W1, b1), ((W2, b2), ((gamma2, beta2), ((W3,b3), ...))))
 """
 
-def initialization_batch_norm_parameters(n, n_prev, device, layer, parameters):
+def _init_liniar_bn_params(n, n_prev, device, layer, parameters):
     if not layer.batch_norm:
         return parameters
 
-    new_params = init.batch_norm_layers(n, n_prev, device)
+    new_params = init.liniar_batch_norm_layers(n, n_prev, device)
 
     return (new_params, parameters)
+
+def _liniar_params(layer, prev_layer, device, parameters):
+    n = layer.units
+    n_prev = prev_layer.units
+    parameters = _init_liniar_bn_params(n, n_prev, device, layer, parameters)
+        
+    new_params = layer.initialization(n, n_prev, device)
+    parameters = (new_params, parameters)
+
+    return parameters
+
+def _conv_prev_input(prev_layer):
+    h, w, c = prev_layer.vol_output
+    
+    return h * w * c
+
+def _init_conv_bn_params(f, n_C, n_prev, device, layer, parameters):
+    if not layer.batch_norm:
+        return parameters
+
+    new_params = init.conv_bn_layers(f, n_C, n_prev, device)
+
+    return (new_params, parameters)
+
+
+def _conv_params(layer, prev_layer, device, parameters):
+    n_prev = _conv_prev_input(prev_layer)
+    f = layer.filters
+    n_C = layer.channels
+
+    parameters = _init_conv_bn_params(f, n_C, n_prev, device, layer, parameters)
+
+    new_params = layer.initialization(f, n_C, n_prev, device)
+    parameters = (new_params, parameters)
+
+    return parameters
 
 def initialize_parameters(layers, device):
     parameters = None
 
     for l in reversed(range(1, len(layers))):
         layer = layers[l]
-        n = layer.units
-        n_prev = layers[l-1].units
+        prev_layer = layers[l-1]
 
-        parameters = initialization_batch_norm_parameters(n, n_prev, device, layer, parameters)
-        
-        new_params = init.init_dict[layer.initialization](n, n_prev, device)
-        parameters = (new_params, parameters)
+        if type(layer).__name__ == 'LayerConfig':
+            parameters = _liniar_params(layer, prev_layer, device, parameters)
+        elif type(layer).__name__ == 'ConvLayer':
+            parameters = _conv_params(layer, prev_layer, device, parameters)
 
-    
     return parameters
