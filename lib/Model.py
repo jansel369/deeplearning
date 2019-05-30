@@ -16,15 +16,15 @@ class Model():
         self.optimizer = optimizer
         self.parameters = None
 
-    def fit(self, X_train, Y_train, is_printable_cost=False, device=get_device()):
+    def fit(self, X_train, Y_train, print_cost=False, device=get_device()):
         layers = self.config.layers
-        n_0 = layers[0].units
-        n_L = layers[-1].units
-        n_0a = X_train.shape[1]
-        n_La = Y_train.shape[1]
+        # n_0 = layers[0].units
+        # n_L = layers[-1].units
+        # n_0a = X_train.shape[1]
+        # n_La = Y_train.shape[1]
 
-        assert n_0 == n_0a, 'Invalid input size: ' + str(n_0) + ' & ' + str(n_0a)
-        assert n_L == n_La, 'Invalid output size: ' + str(n_L) + ' & ' + str(n_La)
+        # assert n_0 == n_0a, 'Invalid input size: ' + str(n_0) + ' & ' + str(n_0a)
+        # assert n_L == n_La, 'Invalid output size: ' + str(n_L) + ' & ' + str(n_La)
 
         forwards = self.config.forwards
         backwards = self.config.backwards
@@ -32,7 +32,7 @@ class Model():
         start_time = time.time() # trainig timer
 
         parameters = params.initialize_parameters(layers, device)
-        parameters = self.optimizer.optimize(X_train, Y_train, parameters, self.optimizer, forwards, backwards, is_printable_cost)
+        parameters = self.optimizer.optimize(X_train, Y_train, parameters, self.optimizer, forwards, backwards, print_cost)
         
         self.parameters = parameters
 

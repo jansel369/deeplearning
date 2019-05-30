@@ -37,8 +37,12 @@ def construct_backwards(backwards, optimizer, to_avg):
     """
 
     new_backwards = []
+    # print(backwards)
 
-    for i in range(1, len(backwards) - 1): #disinclude first and last backwards from list
+    for i in range(1, len(backwards) - 1):
+        """ disinclude first and last backwards from list
+        """
+        # print('err function: ', str(i),  backwards[i].__name__)
         new_backwards.append(backwards[i](optimizer, to_avg))
 
     return backward_propagation(new_backwards, optimizer.loss)

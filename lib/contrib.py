@@ -1,5 +1,5 @@
 from commons import *
-import Model
+from Model import Model
 
 import optimizer
 from optimizer import *

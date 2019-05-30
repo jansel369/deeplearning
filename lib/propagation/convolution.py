@@ -1,3 +1,4 @@
+import torch as pt
 from torch.nn.functional import pad
 from .liniar import liniar_forward
 
@@ -20,10 +21,12 @@ def _conv_single_step(a_slice, W, b):
 
 def conv_forward_a(p, s, n_C):
     def conv_forward(A_prev, params, has_cache, cache):
+        """ W shape: (f, f, n_C_prev, n_C)
+            b shape: (1, 1, 1, n_C)
+        """
 
         current_params, next_params = params
         W, b = current_params
-
         m, n_H_prev, n_W_prev, n_C_prev = A_prev.shape
         f, f, n_C_prev, n_C = W.shape
 
@@ -31,7 +34,7 @@ def conv_forward_a(p, s, n_C):
         n_W = int(( n_W_prev - f + 2 * p ) / s) + 1
 
         # initialize output volume
-        Z = pt.zeros((m, n_H, n_W, n_C), device=A_prev.device)
+        Z = pt.zeros((m, n_H, n_W, n_C), device=A_prev.device, dtype=pt.double)
         
         A_prev_pad = _zero_pad(A_prev, p)
 
@@ -48,6 +51,7 @@ def conv_forward_a(p, s, n_C):
         cace = (((A_prev, p, s, n_C), current_params), cache) if has_cache else None
 
         return Z, next_params, cache
+    return conv_forward
 
 def conv_backward_a():
     """ Backprop to calculate dL/dA
@@ -60,7 +64,7 @@ def conv_backward_a():
             m, n_H, n_W, n_C = dZ.shape
             f, f, n_C_prev, n_C = W.shape
 
-            dA = pt.zeros((m, n_H_prev, n_W_prev, n_C_prev))  
+            dA = pt.zeros((m, n_H_prev, n_W_prev, n_C_prev), dtype=pt.double, deivce=A_prev.device)  
             A_prev_pad = _zero_pad(A_prev, p)
             dA_pad = _zero_pad(dA, pad)
 
@@ -107,8 +111,8 @@ def conv_param_grad_a(select_grad=std_param_grad_f):
             m, n_H, n_W, n_C = dZ.shape
             f, f, n_C_prev, n_C = W.shape
 
-            dW = pt.zeros((f, f, n_C_prev, n_C))
-            db = pt.zeros((1, 1, 1, n_C))
+            dW = pt.zeros((f, f, n_C_prev, n_C), dtype=pt.double, deivce=A_prev.device)
+            db = pt.zeros((1, 1, 1, n_C), dtype=pt.double, deivce=A_prev.device)
             A_prev_pad = _zero_pad(A_prev, p)
 
             for i in range(m):
@@ -133,12 +137,12 @@ def conv_grad_a(activation_backward):
     def conv_grad_i(optimizer, to_avg):
         def conv_grad(dA, param_grad, cache, parameters):
             current_cache, next_cache = cache
-            (A, _, _, _), _ = current_cache
+            A, _, _= current_cache
 
+            print(dA.shape, A.shape)
             dZ = dA * activation_backward(A)
 
             return dZ, param_grad, next_cache, parameters
-        
         return conv_grad
     return conv_grad_i
 
@@ -165,7 +169,7 @@ def pool_forward_a(f, s, pool=max_pool):
         n_W = int(1 + (n_W_prev - f) / s)
         n_C = n_C_prev
 
-        A = pt.zeros((m, n_H, n_W, n_C), device=A_prev.device)
+        A = pt.zeros((m, n_H, n_W, n_C), dtype=pt.double, device=A_prev.device)
 
         for i in range(m):
             a_prev_pad = A_prev[i]
@@ -180,11 +184,10 @@ def pool_forward_a(f, s, pool=max_pool):
         cache = ((A_prev, f, s), cache) if has_cache else None
 
         return A, params, cache
-
     return pool_forward
 
 def _max_pool_mask(da, slice, device):
-    return (slice == slice.max()) * da
+    return ((slice == slice.max()) * da).double()
 
 def _avg_value_distribute(da, slice, device):
     n_H, n_W = slice.shape
@@ -201,7 +204,7 @@ def _pool_backward_a(type_pool_backward):
             m, n_H, n_W, n_C = dA.shape
             device = A_prev.device
 
-            dA_prev = pt.zeros((m, n_H_prev, n_W_prev, n_C_prev))
+            dA_prev = pt.zeros((m, n_H_prev, n_W_prev, n_C_prev), dtype=pt.double, device=A_prev.device)
 
             for i in range(m):
                 a_prev = A_prev[i]
@@ -213,14 +216,15 @@ def _pool_backward_a(type_pool_backward):
                         w_start = w * s
                         w_end = w_start + f
 
-                        a_prev_slice = a_prev[h_start:h_end, w_start:w_end, c]
-
                         for c in range(n_C):
+                            a_prev_slice = a_prev[h_start:h_end, w_start:w_end, c]
                             da = dA[i, h, w, c]
 
                             dA_prev[i, h_start:h_end, w_start:w_end, c] += type_pool_backward(da, a_prev_slice, device)
 
             return dA_prev, param_grad, next_cache, parameters
+        return pool_backward
+    return pool_backward_i
 
 def max_pool_backward_a():
     return _pool_backward_a(_max_pool_mask)
@@ -246,10 +250,9 @@ def flatten_forward(A_prev, params, has_cache, cache):
 
 def flatten_backward_i(optimizer, to_avg): 
     def flatten_backward(dA, param_grad, cache, parameters):
-        shape, next_cache = cache
+        _, (shape, next_cache) = cache
 
         dA_vol = dA.reshape(shape)
 
         return dA_vol, param_grad, next_cache, parameters
-
     return flatten_backward

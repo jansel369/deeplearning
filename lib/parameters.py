@@ -24,7 +24,7 @@ def _liniar_params(layer, prev_layer, device, parameters):
     return parameters
 
 def _conv_prev_input(prev_layer):
-    h, w, c = prev_layer.vol_output
+    h, w, c = prev_layer.out_shape
     
     return h * w * c
 
@@ -41,10 +41,10 @@ def _conv_params(layer, prev_layer, device, parameters):
     n_prev = _conv_prev_input(prev_layer)
     f = layer.filters
     n_C = layer.channels
+    n_C_prev = prev_layer.out_shape.channels
 
     parameters = _init_conv_bn_params(f, n_C, n_prev, device, layer, parameters)
-
-    new_params = layer.initialization(f, n_C, n_prev, device)
+    new_params = layer.initialization(f, n_C_prev, n_C, n_prev, device)
     parameters = (new_params, parameters)
 
     return parameters

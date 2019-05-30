@@ -55,40 +55,42 @@ def liniar_batch_norm_layers(n, n_prev, device):
 # }
 
 """Convolution initializatoin
+        W shape: (f, f, n_C_prev, n_C)
+        b shape: (1, 1, 1, n_C)
 """
 
-def conv_weight_std(f, n_C, device):
-    return pt.randn((f, f, n_C), dtype=pt.double, device=device)
+def conv_weight_std(f, n_C_prev, n_C, device):
+    return pt.randn((f, f, n_C_prev, n_C), dtype=pt.double, device=device)
 
 def conv_bias_std(n_C, device):
-    return pt.zeros((n_C, 1, 1, 1), dtype=pt.double, device=device)
+    return pt.zeros((1, 1, 1, n_C), dtype=pt.double, device=device)
 
-def conv_weight_he(f, n_C, n_prev, device):
-    return conv_weight_std(f, n_C, device) * ((2 / n_prev) ** 0.5)
+def conv_weight_he(f, n_C_prev, n_C, n_prev, device):
+    return conv_weight_std(f, n_C_prev, n_C, device) * ((2 / n_prev) ** 0.5)
 
-def conv_weight_glorot(f, n_C, n_prev, device):
-    return conv_weight_std(f, n_C, device) * ((1 / n_prev) ** 0.5)
+def conv_weight_glorot(f, n_C_prev, n_C, n_prev, device):
+    return conv_weight_std(f, n_C_prev, n_C, device) * ((1 / n_prev) ** 0.5)
 
 def conv_gamma_bn_std(n_C, device):
-    return pt.ones((n_C, 1, 1, 1), dtype=pt.double, device=device)
+    return pt.ones((1, 1, 1, n_C), dtype=pt.double, device=device)
 
 def conv_beta_bn_std(n_C, device):
     return conv_bias_std(n_C, device)
 
-def conv_std_layers(f, n_C, n_prev, device):
-    W = conv_weight_std(f, n_C, device)
+def conv_std_layers(f, n_C_prev, n_C, n_prev, device):
+    W = conv_weight_std(f, n_C_prev, n_C, device)
     b = conv_bias_std(n_C, device)
 
     return [W, b]
 
-def conv_he_layers(f, n_C, n_prev, device):
-    W = conv_weight_he(f, n_C, n_prev, device)
+def conv_he_layers(f, n_C_prev, n_C, n_prev, device):
+    W = conv_weight_he(f, n_C_prev, n_C, n_prev, device)
     b = conv_bias_std(n_C, device)
 
     return [W, b]
 
-def conv_glorot_layers(f, n_C, n_prev, device):
-    W = conv_weight_glorot(f, n_C, n_prev, device)
+def conv_glorot_layers(f, n_C_prev, n_C, n_prev, device):
+    W = conv_weight_glorot(f, n_C_prev, n_C, n_prev, device)
     b = conv_bias_std(n_C, device)
 
     return [W, b]

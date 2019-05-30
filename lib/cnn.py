@@ -6,14 +6,14 @@ from nn import Config
 from collections import namedtuple
 import initialization as init
 
-VolOutput = namedtuple('VolOutout', 'height, width, channels')
-ConvLayer = namedtuple('ConvLayer', 'vol_output, filters, channels, padding, stride, activation, initialization, batch_norm')
-PoolLayer = namedtuple('PoolLayer', 'units')
+OutShape = namedtuple('OutShape', 'height, width, channels')
+ConvLayer = namedtuple('ConvLayer', 'out_shape, filters, channels, padding, stride, activation, initialization, batch_norm')
+PoolLayer = namedtuple('PoolLayer', 'out_shape, pool, units')
 
 def _update_conv_config(config, activation, init):
     layer = config.layers[-1]
-    f, n_C, p, s, _, _, bn = layer
-    config.layers[-1] = ConvLayer(f, n_C, p, s, activation, init, bn)
+    v, f, n_C, p, s, _, _, bn = layer
+    config.layers[-1] = ConvLayer(v, f, n_C, p, s, activation, init, bn)
 
     return config
 
@@ -24,18 +24,18 @@ def _calculate_side(prev_side, filter, padding, stride):
 """
 
 def conv_input(img_height, img_width, img_channels):
-    vol_output = VolOutput(img_height, img_width, img_channels)
-    layer = ConvLayer(vol_output, None, None, None, None, None, None, False)
+    out_shape = OutShape(img_height, img_width, img_channels)
+    layer = ConvLayer(out_shape, None, None, None, None, None, None, False)
     config = Config([layer], [], [])
 
     return config
 
 def conv(filters, channels, padding, stride):
     def f(config):
-        prev_side = config.layers[-1].vol_output.height
+        prev_side = config.layers[-1].out_shape.height
         side = _calculate_side(prev_side, filters, padding, stride)
-        vol_output = VolOutput(side, side, channels)
-        conv_layer = ConvLayer(vol_output, filters, channels, padding, stride, 'liniar', 'std', False)
+        out_shape = OutShape(side, side, channels)
+        conv_layer = ConvLayer(out_shape, filters, channels, padding, stride, 'liniar', 'std', False)
         
         config.layers.append(conv_layer)
         
@@ -45,34 +45,60 @@ def conv(filters, channels, padding, stride):
         config.backwards.append(prop.update_param_a())
         config.backwards.append(prop.conv_param_grad_a())
 
+        return config
+    return f
 
 def relu(initialization=init.conv_he_layers):
     def f(config):
-        config = _update_conv_config(config, a.relu, init)
+        config = _update_conv_config(config, a.relu, initialization)
         config.forwards.append(prop.activation_forward_a(a.relu.forward))
-        config.backwards.appen(prop.conv_grad_a(a.relu.backward))
+
+        config.backwards.append(prop.conv_grad_a(a.relu.backward))
 
         return config
     return f
 
-def max_pool(filters, strides):
+def _gen_out_shape(config, filters, stride):
+        prev_out_shape = config.layers[-1].out_shape
+        prev_side = prev_out_shape.height
+        n_C_prev = prev_out_shape.channels
+        side = _calculate_side(prev_side, filters, 0, stride)
+        out_shape = OutShape(side, side, n_C_prev)
+        units = side * side * n_C_prev
+
+        return out_shape, units
+
+def max_pool(filters, stride):
     def f(config):
-        pool_layer = PoolLayer('max')
+        out_shape, units = _gen_out_shape(config, filters, stride)
+        pool_layer = PoolLayer(out_shape, 'max', units)
         config.layers.append(pool_layer)
-        config.forwards.append(prop.max_pool_forward_a(filters, strides))
+        config.forwards.append(prop.max_pool_forward_a(filters, stride))
         config.backwards.append(prop.max_pool_backward_a())
 
-def avg_pool(filters, strides):
+        return config
+    return f
+
+def avg_pool(filters, stride):
     def f(config):
-        pool_layer = PoolLayer('avg')
+        out_shape, units = _gen_out_shape(config, filters, stride)
+        pool_layer = PoolLayer(out_shape, 'avg', units)
         config.layers.append(pool_layer)
-        config.forwards.append(prop.avg_pool_forward_a(filters, strides))
+
+        config.forwards.append(prop.avg_pool_forward_a(filters, stride))
+       
         config.backwards.append(prop.avg_pool_backward_a())
+
+        return config
+    return f
 
 def flatten():
     def f(config):
         config.forwards.append(prop.flatten_forward)
         config.backwards.append(prop.flatten_backward_i)
+
+        return config
+    return f
 
 # def batch_norm():
 #     def f(config):
