@@ -60,7 +60,7 @@ img_width = X_train.shape[2]
 img_channels = X_train.shape[3]
 
 X = cnn.conv_input(img_height, img_width, img_channels)
-X = cnn.conv(5, 6, 0, 1)(X)
+X = cnn.conv(8, 6, 0, 1)(X)
 X = cnn.relu()(X)
 X = cnn.avg_pool(2, 2)(X)
 X = cnn.conv(5, 16, 0, 1)(X)
@@ -78,8 +78,9 @@ loss = contrib.loss.categorical_crossentropy
 gd = contrib.gradient_descent(loss, 500)
 
 model = contrib.Model(X, gd)
+model.print_meta()
 
-parameters, cost_evaluator = model.fit(X_train, Y_train, print_cost=True)
+parameters, cost_evaluator = model.fit(X_train, Y_train, print_cost=True, steps=1)
 
 train_acc = model.evaluate(X_train, Y_train, 'train')
 # test_acc = model.evaluate(X_test, Y_test, 'test')

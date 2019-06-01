@@ -6,3 +6,13 @@ def get_device():
 
 def from_numpy(t, device=get_device(), dtype=pt.double):
     return pt.tensor(t.tolist(), device=device, dtype=dtype)
+
+# def print_shape(config):
+#     layers = config.layers
+
+#     for layer in layers:
+#         if type(layer).__name__ == 'LayerConfig':
+#             print('n_prev: $s n: $s' $ ())
+#         elif type(layer).__name__ == 'ConvLayer':
+        
+#         elif type(layer).__name__ == 'PoolLayer':

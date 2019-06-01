@@ -8,36 +8,39 @@ from collections import namedtuple
 """ Declare model configuration types
 """
 Config = namedtuple('Config', 'layers, forwards, backwards')
-LayerConfig = namedtuple('LayerConfig', 'units, activation, initialization, batch_norm, sequence')
+LayerConfig = namedtuple('LayerConfig', 'units, activation, initialization, batch_norm, sequence, meta')
 
 """ Helper functions
 """
-def create_layer_config(units, activation='linear'):
-    layer = LayerConfig(units, activation, 'std', False, ['liniar'])
+def _create_layer_config(units, n_prev, activation='linear'):
+    meta = ('Layer: (n_prev: %d, n: %d)' % (n_prev, units))
+    layer = LayerConfig(units, activation, 'std', False, ['liniar'], meta)
 
     return layer
 
 def update_layer_config(config, activation, init):
     layer = config.layers[-1]
 
-    a, _, _, d, sequence = layer
+    a, _, _, d, sequence, meta = layer
     sequence.append(activation)
 
-    config.layers[-1] = LayerConfig(a, activation, init, d, sequence)
+    config.layers[-1] = LayerConfig(a, activation, init, d, sequence, meta)
 
     return config
 
 """ liniar functions
 """
 def input(units):
-    layer = LayerConfig(units, 'liniar', 'std', False, ['input'])
+    meta = ('Input: %d' % (units))
+    layer = LayerConfig(units, 'liniar', 'std', False, ['input'], meta)
     config = Config([layer], [], [])
 
     return config
 
 def layer(units):
     def a(config):
-        layer = create_layer_config(units)
+        n_prev = config.layers[-1].units
+        layer = _create_layer_config(units, n_prev)
         config.forwards.append(prop.liniar_forward)
         config.layers.append(layer)
         

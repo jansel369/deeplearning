@@ -16,7 +16,11 @@ class Model():
         self.optimizer = optimizer
         self.parameters = None
 
-    def fit(self, X_train, Y_train, print_cost=False, device=get_device()):
+    def print_meta(self):
+        for layer in self.config.layers:
+            print(layer.meta)
+
+    def fit(self, X_train, Y_train, print_cost=False, device=get_device(), steps=100):
         layers = self.config.layers
         # n_0 = layers[0].units
         # n_L = layers[-1].units
@@ -32,7 +36,7 @@ class Model():
         start_time = time.time() # trainig timer
 
         parameters = params.initialize_parameters(layers, device)
-        parameters = self.optimizer.optimize(X_train, Y_train, parameters, self.optimizer, forwards, backwards, print_cost)
+        parameters = self.optimizer.optimize(X_train, Y_train, parameters, self.optimizer, forwards, backwards, print_cost, steps)
         
         self.parameters = parameters
 

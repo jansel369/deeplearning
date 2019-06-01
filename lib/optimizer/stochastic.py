@@ -6,7 +6,7 @@ from .gradient_descent import gd_update_param_f
 
 GradientDescent = namedtuple('GradientDescent', 'loss, epochs, batch_size, learning_rate, optimize, param_update_f')
 
-def stochastic_optimization(X, Y, parameters, optimizer, forwards, backwards, print_cost=False):
+def stochastic_optimization(X, Y, parameters, optimizer, forwards, backwards, print_cost=False, steps=100):
     costs = []
     opochs = optimizer.epochs
     batch_size = optimizer.batch_size
@@ -35,7 +35,7 @@ def stochastic_optimization(X, Y, parameters, optimizer, forwards, backwards, pr
             AL, cache = forward_prop(X_b, parameters)
             parameters = back_prop(AL, Y_b, cache)
 
-            if total_iterations % 100 == 0:
+            if total_iterations % steps == 0:
                 cost = compute_cost(AL, Y_b)
                 costs.append(cost)
 

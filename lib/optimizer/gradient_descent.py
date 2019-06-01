@@ -1,6 +1,7 @@
 
 from collections import namedtuple
 from propagation import construct_backwards, forward_propagation
+import time
 
 GradientDescent = namedtuple('GradientDescent', 'loss, iterations, learning_rate, optimize, param_update_f')
 
@@ -19,7 +20,7 @@ def gd_update_param_f(optimizer, to_avg):
     
     return update_param
 
-def gradient_optimization(X, Y, parameters, optimizer, forwards, backwards, print_cost=False):
+def gradient_optimization(X, Y, parameters, optimizer, forwards, backwards, print_cost=False, steps=100):
     costs = []
     iterations = optimizer.iterations
     m = Y.shape[0]
@@ -30,14 +31,19 @@ def gradient_optimization(X, Y, parameters, optimizer, forwards, backwards, prin
     back_prop = construct_backwards(backwards, optimizer, to_avg)
 
     for i in range(iterations):
+        start_time = time.time()
+
         AL, cache = forward_prop(X, parameters)
         parameters = back_prop(AL, Y, cache)
 
-        if i % 100 == 0:
+        if i % steps == 0:
             cost_i = compute_cost(AL, Y)
             costs.append(cost_i)
+            epoch_time = time.time() - start_time
             if print_cost:
-                print("Cost after iteration %i: %f " % (i + 1, cost_i))
+                print("Cost after iteration %i: %f, time: %f" % (i + 1, cost_i, epoch_time))
+            
+            start_time = time.time()
 
     return parameters
 

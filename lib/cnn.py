@@ -7,13 +7,13 @@ from collections import namedtuple
 import initialization as init
 
 OutShape = namedtuple('OutShape', 'height, width, channels')
-ConvLayer = namedtuple('ConvLayer', 'out_shape, filters, channels, padding, stride, activation, initialization, batch_norm')
-PoolLayer = namedtuple('PoolLayer', 'out_shape, pool, units')
+ConvLayer = namedtuple('ConvLayer', 'out_shape, filters, channels, padding, stride, activation, initialization, batch_norm, meta')
+PoolLayer = namedtuple('PoolLayer', 'out_shape, pool, units, meta')
 
 def _update_conv_config(config, activation, init):
     layer = config.layers[-1]
-    v, f, n_C, p, s, _, _, bn = layer
-    config.layers[-1] = ConvLayer(v, f, n_C, p, s, activation, init, bn)
+    v, f, n_C, p, s, _, _, bn, m = layer
+    config.layers[-1] = ConvLayer(v, f, n_C, p, s, activation, init, bn, m)
 
     return config
 
@@ -25,7 +25,8 @@ def _calculate_side(prev_side, filter, padding, stride):
 
 def conv_input(img_height, img_width, img_channels):
     out_shape = OutShape(img_height, img_width, img_channels)
-    layer = ConvLayer(out_shape, None, None, None, None, None, None, False)
+    meta = ('Input Image: (h: %d, w: %d, n_C: %d)' % (img_height, img_width, img_channels))
+    layer = ConvLayer(out_shape, None, None, None, None, None, None, False, meta)
     config = Config([layer], [], [])
 
     return config
@@ -35,7 +36,8 @@ def conv(filters, channels, padding, stride):
         prev_side = config.layers[-1].out_shape.height
         side = _calculate_side(prev_side, filters, padding, stride)
         out_shape = OutShape(side, side, channels)
-        conv_layer = ConvLayer(out_shape, filters, channels, padding, stride, 'liniar', 'std', False)
+        meta = ('Conv:(h: %d, w: %d, n_C: %d), p: %d, f: %d, s: %d' % (side, side, channels, padding, filters, stride))
+        conv_layer = ConvLayer(out_shape, filters, channels, padding, stride, 'liniar', 'std', False, meta)
         
         config.layers.append(conv_layer)
         
@@ -58,20 +60,21 @@ def relu(initialization=init.conv_he_layers):
         return config
     return f
 
-def _gen_out_shape(config, filters, stride):
+def _gen_out_shape(config, filters, stride, pool):
         prev_out_shape = config.layers[-1].out_shape
         prev_side = prev_out_shape.height
         n_C_prev = prev_out_shape.channels
         side = _calculate_side(prev_side, filters, 0, stride)
         out_shape = OutShape(side, side, n_C_prev)
         units = side * side * n_C_prev
+        meta = ('Pool(%s):(h: %d, w: %d, n_C: %d), f: %d, s: %d' % (pool, side, side, n_C_prev, filters, stride))
 
-        return out_shape, units
+        return out_shape, units, meta
 
 def max_pool(filters, stride):
     def f(config):
-        out_shape, units = _gen_out_shape(config, filters, stride)
-        pool_layer = PoolLayer(out_shape, 'max', units)
+        out_shape, units, meta = _gen_out_shape(config, filters, stride, 'max')
+        pool_layer = PoolLayer(out_shape, 'max', units, meta)
         config.layers.append(pool_layer)
         config.forwards.append(prop.max_pool_forward_a(filters, stride))
         config.backwards.append(prop.max_pool_backward_a())
@@ -81,8 +84,8 @@ def max_pool(filters, stride):
 
 def avg_pool(filters, stride):
     def f(config):
-        out_shape, units = _gen_out_shape(config, filters, stride)
-        pool_layer = PoolLayer(out_shape, 'avg', units)
+        out_shape, units, meta = _gen_out_shape(config, filters, stride, 'avg')
+        pool_layer = PoolLayer(out_shape, 'avg', units, meta)
         config.layers.append(pool_layer)
 
         config.forwards.append(prop.avg_pool_forward_a(filters, stride))
