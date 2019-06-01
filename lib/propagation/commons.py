@@ -5,6 +5,7 @@ def forward_propagation(forwards, has_cache=False):
         cache = None
 
         for forward in forwards:
+            # print('forwards name: ', forward.__name__)
             X, parameters, cache = forward(X, parameters, has_cache, cache)
         
         return X, cache

@@ -1,4 +1,5 @@
 import math
+import time
 
 from collections import namedtuple
 from propagation import construct_backwards, forward_propagation
@@ -26,6 +27,8 @@ def stochastic_optimization(X, Y, parameters, optimizer, forwards, backwards, pr
     print("batch count: ", batch_count)
 
     for i in range(opochs):
+        start_time = time.time()
+
         for t in range(batch_count):
             total_iterations += 1
 
@@ -40,8 +43,9 @@ def stochastic_optimization(X, Y, parameters, optimizer, forwards, backwards, pr
                 costs.append(cost)
 
                 if print_cost:
-                    print("Cost after epoch %i, batch %i: %f " % (i+1, t+1, cost))
-
+                    step_time = time.time() - start_time
+                    print("Cost after (time: %f, epoch %i, batch %i): %f " % (step_time, i+1, t+1, cost))
+                    start_time = time.time()
 
     return parameters
 

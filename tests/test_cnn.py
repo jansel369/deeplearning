@@ -20,24 +20,24 @@ import matplotlib.pyplot as plt
 import mnist.input_data as data_source
 import seed_cnn as seed
 
-# mnist = data_source.read_data_sets("datasets/mnist/data/", reshape=False, one_hot=True)
 device = contrib.get_device()
+mnist = data_source.read_data_sets("datasets/mnist/data/", reshape=False, one_hot=True)
 
-# X_train = contrib.from_numpy(mnist.train.images, device)#[:, 0:3000]
-# Y_train = contrib.from_numpy(mnist.train.labels, device)#[:, 0:3000]
+X_train = contrib.from_numpy(mnist.train.images, device)[:, 0:3000]
+Y_train = contrib.from_numpy(mnist.train.labels, device)[:, 0:3000]
 
-# X_test = contrib.from_numpy(mnist.test.images, device)
-# Y_test = contrib.from_numpy(mnist.test.labels, device)
+X_test = contrib.from_numpy(mnist.test.images, device)
+Y_test = contrib.from_numpy(mnist.test.labels, device)
 
-# X_validation = contrib.from_numpy(mnist.validation.images, device)
-# Y_validation = contrib.from_numpy(mnist.validation.labels, device)
+X_validation = contrib.from_numpy(mnist.validation.images, device)
+Y_validation = contrib.from_numpy(mnist.validation.labels, device)
 
-# print("\ntrain shape: X=%s, Y=%s" % (X_train.shape, Y_train.shape))
-# print("validation shape: X=%s, Y=%s" % (X_validation.shape, Y_validation.shape))
-# print("test shape: X=%s, Y=%s" % (X_test.shape, Y_test.shape))
+print("\ntrain shape: X=%s, Y=%s" % (X_train.shape, Y_train.shape))
+print("validation shape: X=%s, Y=%s" % (X_validation.shape, Y_validation.shape))
+print("test shape: X=%s, Y=%s" % (X_test.shape, Y_test.shape))
 
-# # print(X_train[0])
-# # print(Y_train[0])
+# print(X_train[0])
+# print(Y_train[0])
 
 # f = open('x.txt', 'w')
 # f.write(str(X_train[1].tolist()))
@@ -46,11 +46,11 @@ device = contrib.get_device()
 # f.close()
 
 
-X_train = seed.X_train
-Y_train = seed.Y_train
-device = seed.device
+# X_train = seed.X_train
+# Y_train = seed.Y_train
+# device = seed.device
 
-print("\ntrain shape: X=%s, Y=%s" % (X_train.shape, Y_train.shape))
+# print("\ntrain shape: X=%s, Y=%s" % (X_train.shape, Y_train.shape))
 
 
 
@@ -74,10 +74,10 @@ X = nn.softmax()(X)
 
 loss = contrib.loss.categorical_crossentropy
 
-# adam = contrib.adam(loss, 7)
+adam = contrib.adam(loss, 7)
 gd = contrib.gradient_descent(loss, 500)
 
-model = contrib.Model(X, gd)
+model = contrib.Model(X, adam)
 model.print_meta()
 
 parameters, cost_evaluator = model.fit(X_train, Y_train, print_cost=True, steps=1)
